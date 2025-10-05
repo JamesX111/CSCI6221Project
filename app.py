@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from .db_model import db, init_db
+from db_model import db, init_db
 app = Flask(__name__)
 
 # Set your database URI here
