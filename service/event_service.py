@@ -3,6 +3,7 @@ from db_model import db, Event
 from flask_sqlalchemy import SQLAlchemy
 
 
+
 def create_event(event_data):
     # Validate input data
     required_fields = ['name', 'date', 'location']
@@ -19,8 +20,8 @@ def create_event(event_data):
     )
 
     # Add to session and commit
-    db_session.add(new_event)
-    db_session.commit()
+    db.add(new_event)
+    db.commit()
 
     return new_event.to_dict()
 
@@ -42,7 +43,7 @@ def update_event(event_id, update_data):
         else:
             raise ValueError(f"Invalid field: {key}")
 
-    db_session.commit()
+    db.commit()
     return event.to_dict()
 
 def delete_event(event_id):
@@ -50,6 +51,6 @@ def delete_event(event_id):
     if not event:
         raise ValueError(f"Event with id {event_id} does not exist.")
 
-    db_session.delete(event)
-    db_session.commit()
+    db.delete(event)
+    db.commit()
     return {"message": f"Event with id {event_id} has been deleted."}
