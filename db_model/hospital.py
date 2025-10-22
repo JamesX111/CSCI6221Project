@@ -19,8 +19,8 @@ class Hospital(db.Model):
     has_radiology = db.Column(db.Boolean, default=False, nullable=False)
     has_maternity = db.Column(db.Boolean, default=False, nullable=False)
 
-    # Relationships (optional)
-    doctors = db.relationship('Doctor', backref='hospital', lazy=True)
+    # # Relationships (optional)
+    # doctors = db.relationship('Doctor', backref='hospital', lazy=True)
 
     def __repr__(self):
         return f'<Hospital {self.name}>'

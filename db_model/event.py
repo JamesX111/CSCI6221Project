@@ -13,7 +13,12 @@ class Event(db.Model):
     event_type = db.Column(db.String(50), nullable=False)  # e.g. 'Consultation', 'Surgery', 'Follow-up'
     description = db.Column(db.Text, nullable=True)
     scheduled_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    # Payment details
+    payment_amount = db.Column(db.Float, nullable=True)  # Amount paid for the event
+    payment_method = db.Column(db.String(50), nullable=True)  # e.g. 'Credit Card', 'Cash', 'Insurance'
 
+    # Appointment status
+    status = db.Column(db.String(20), nullable=False, default='Scheduled')  # e.g. 'Scheduled', 'Completed', 'Cancelled'
     # Relationships
     patient = db.relationship('Patient', backref='events', lazy=True)
     doctor = db.relationship('Doctor', backref='events', lazy=True)
@@ -30,13 +35,18 @@ class Event(db.Model):
             'event_type': self.event_type,
             'description': self.description,
             'scheduled_at': format_datetime(self.scheduled_at),
+            'payment': {
+            'amount': self.payment_amount,
+            'method': self.payment_method
+            },
+            'status': self.status,
             'patient': {
-                'id': self.patient.id,
-                'name': self.patient.name
+            'id': self.patient.id,
+            'name': self.patient.name
             } if self.patient else None,
             'doctor': {
-                'id': self.doctor.id,
-                'name': self.doctor.name,
-                'department': self.doctor.department
+            'id': self.doctor.id,
+            'name': self.doctor.name,
+            'department': self.doctor.department
             } if self.doctor else None
         }
