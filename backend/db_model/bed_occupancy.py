@@ -5,6 +5,7 @@ class BedOccupancy(db.Model):
     """Bed Occupancy model"""
     __tablename__ = 'bed_occupancy'
 
+
     bed_id = db.Column(db.Integer, primary_key=True)
     ward = db.Column(db.String(50), nullable=True)
     status = db.Column(db.String(20), nullable=True)
