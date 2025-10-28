@@ -21,7 +21,17 @@ def create_app():
     return app
 
 app = create_app()
-CORS(app)
+CORS(app,
+     resources={"/*": {
+         "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         "allow_headers": "*",
+         "expose_headers": "*"
+     }})
+
+db.init_app(app)
+with app.app_context():
+    db.create_all()
 
 def reset_db(app):
     """Completely reset the database (drop all tables, then recreate)."""
@@ -58,13 +68,7 @@ def reset_database_route():
     reset_db(app)
     return jsonify({"message": "Database has been reset!"})
 
-# get all patients
-@app.route('/api/get_patients', methods=['POST'])
-def get_patients():
-    with app.app_context():
-        patients = Patient.query.all()
-        patients_list = [patient.to_dict() for patient in patients]
-        return jsonify(patients_list)
+
 
 # get all hospitals
 @app.route('/api/get_hospitals', methods=['POST'])
