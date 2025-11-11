@@ -1,0 +1,67 @@
+.events-page {
+  padding: 2rem;
+}
+
+.events-title {
+  margin-bottom: 1.5rem;
+  color: #0b3d91; /* solid dark blue for consistency */
+}
+
+.events-table {
+  border-collapse: separate !important;
+  border-spacing: 0 8px !important; /* adds space between rows */
+}
+
+/* Control column width proportions */
+.events-table th,
+.events-table td {
+  vertical-align: middle;
+  text-align: left;
+}
+
+/* Flex-based proportional widths */
+.events-table th:nth-child(1),
+.events-table td:nth-child(1) { width: 8%; }  /* ID */
+.events-table th:nth-child(2),
+.events-table td:nth-child(2) { width: 10%; } /* Type */
+.events-table th:nth-child(3),
+.events-table td:nth-child(3) { width: 40%; } /* Description */
+.events-table th:nth-child(4),
+.events-table td:nth-child(4) { width: 10%; } /* Scheduled */
+.events-table th:nth-child(5),
+.events-table td:nth-child(5) { width: 8%; }  /* Status */
+.events-table th:nth-child(6),
+.events-table td:nth-child(6) { width: 12%; } /* Doctor */
+.events-table th:nth-child(7),
+.events-table td:nth-child(7) { width: 12%; } /* Patient */
+
+/* Slight row hover effect */
+.events-table tbody tr:hover {
+  background-color: #f0f6ff;
+  transition: background-color 0.2s ease-in-out;
+}
+
+
+.events-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.add-event-btn {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
+  border-radius: 8px !important;
+  padding: 6px 16px !important;
+  font-weight: 500 !important;
+  transition: all 0.25s ease-in-out !important;
+}
+
+.add-event-btn:hover {
+  background-color: black !important;
+  color: white !important;
+  transform: translateY(-1px);
+}
+

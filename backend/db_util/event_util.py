@@ -30,9 +30,9 @@ def create_event(event_data):
         event_type = event_data['event_type'],
         description = event_data.get('description'),
         scheduled_at = event_data.get('scheduled_at', datetime.utcnow()),
-        payment_amount = event_data.get('payme  nt_amount'),
+        payment_amount = event_data.get('payment_amount'),
         payment_method = event_data.get('payment_method'),
-        status = event_data.get('status', 'Scheduled'),
+        status = event_data.get('status', 'Initialized'),
     )
 
     # Add to session and commit

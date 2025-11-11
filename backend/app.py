@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from db_model import db, init_db
 from flask_cors import CORS
+from routes import register_routes
 app = Flask(__name__)
 
 
@@ -20,6 +21,14 @@ def create_app():
 
     return app
 
+def configure_app_routes():
+    try:
+        register_routes(app)
+        return True
+    except Exception as e:
+        print(f"register fail: {str(e)}")
+        return False
+
 app = create_app()
 CORS(app,
      resources={"/*": {
@@ -32,6 +41,10 @@ CORS(app,
 db.init_app(app)
 with app.app_context():
     db.create_all()
+
+global_app = app
+global_db = db
+configure_app_routes()
 
 def reset_db(app):
     """Completely reset the database (drop all tables, then recreate)."""

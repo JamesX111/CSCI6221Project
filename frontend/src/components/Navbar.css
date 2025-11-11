@@ -1,0 +1,14 @@
+.custom-nav-link {
+  color: white !important;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  padding: 8px 12px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.custom-nav-link:hover {
+  color: black !important;
+  background-color: white;
+  text-decoration: none;
+}

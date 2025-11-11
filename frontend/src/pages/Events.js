@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'react-bootstrap';
+import { Table, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import './Events.css';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -12,13 +14,24 @@ const Events = () => {
   }, []);
 
   return (
-    <div>
-      <h2>Events</h2>
-      <Table striped bordered hover>
+    <div className="events-page">
+      <div className="events-header">
+        <h2 className="events-title">Events</h2>
+        <Link to="/create-event">
+          <Button className="add-event-btn">Add Event</Button>
+        </Link>
+      </div>
+
+      <Table striped bordered hover className="events-table">
         <thead>
           <tr>
-            <th>ID</th><th>Type</th><th>Description</th>
-            <th>Scheduled</th><th>Status</th><th>Doctor</th><th>Patient</th>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Scheduled</th>
+            <th>Status</th>
+            <th>Doctor</th>
+            <th>Patient</th>
           </tr>
         </thead>
         <tbody>
