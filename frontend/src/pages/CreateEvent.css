@@ -1,0 +1,65 @@
+.create-event-page {
+  padding: 2rem;
+}
+
+.create-event-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #0b3d91;
+}
+
+.required {
+  color: red;
+}
+
+/* Indent all form fields by about 2 tab stops (~40px) */
+.create-event-form {
+  margin-left: 40px;
+}
+
+/* Make sure label + field align at same vertical line */
+.create-event-form .form-field .form-label {
+  font-weight: 500;
+  color: #0b3d91;
+  display: block;
+}
+
+.create-event-form .form-field .form-control {
+  border-radius: 8px;
+  border: 1px solid #aaa;
+  transition: border-color 0.25s ease-in-out;
+  width: 100%; /* textarea and inputs same width */
+}
+
+.create-event-form .form-field .form-control:focus {
+  border-color: #0b3d91;
+  box-shadow: 0 0 0 0.2rem rgba(11, 61, 145, 0.2);
+}
+
+/* Double spacing between fields */
+.create-event-form .form-field {
+  margin-bottom: 4rem;
+}
+
+/* Center the create button below everything */
+.create-event-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.create-event-btn {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
+  border-radius: 8px !important;
+  padding: 10px 24px !important;
+  font-weight: 500 !important;
+  transition: all 0.25s ease-in-out !important;
+}
+
+.create-event-btn:hover {
+  background-color: black !important;
+  color: white !important;
+  transform: translateY(-1px);
+}

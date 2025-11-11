@@ -5,7 +5,7 @@ from db_model import db, Patient
 # ---------------------------------------------------
 def create_patient(patient_data):
     """Create a new Patient record in the database."""
-    required_fields = ['name', 'email', 'password']
+    required_fields = ['name', 'email']
     for field in required_fields:
         if field not in patient_data or not patient_data[field]:
             raise ValueError(f"Missing required field: {field}")
@@ -22,7 +22,8 @@ def create_patient(patient_data):
     )
 
     # Use model’s password setter for hashing
-    new_patient.password = patient_data['password']
+    if 'password' in patient_data and patient_data['password']:
+        new_patient.password = patient_data['password']
 
     # Save
     db.session.add(new_patient)
