@@ -18,6 +18,7 @@ def create_hospital(hospital_data):
     if 'name' not in hospital_data or not hospital_data['name']:
         raise ValueError("Missing required field: name")
 
+    # Extract departments dict (default empty)
     departments = hospital_data.get('departments', {})
 
     new_hospital = Hospital(
@@ -39,7 +40,8 @@ def create_hospital(hospital_data):
     db.session.add(new_hospital)
     db.session.commit()
 
-    return new_hospital.to_dict() if hasattr(new_hospital, "to_dict") else new_hospital
+    return new_hospital.to_dict()
+
 
 
 def get_hospital(hospital_id):

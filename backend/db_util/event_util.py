@@ -39,7 +39,7 @@ def create_event(event_data):
     db.session.add(new_event)
     db.session.commit()
 
-    return new_event.to_dict() if hasattr(new_event, "to_dict") else new_event
+    return new_event
 
 
 def get_event(event_id):
@@ -56,11 +56,24 @@ def update_event(event_id, update_data):
     # Update fields
     for key, value in update_data.items():
         if hasattr(event, key):
-            setattr(event, key, value)
+            if key == "scheduled_at" and value:
+                # Convert string to datetime
+                try:
+                    # Try both formats
+                    try:
+                        event.scheduled_at = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        event.scheduled_at = datetime.strptime(value, "%Y-%m-%dT%H:%M")
+                except ValueError:
+                    raise ValueError(
+                        "DateTime format must be 'YYYY-MM-DD HH:MM[:SS]' or 'YYYY-MM-DDTHH:MM'"
+                    )
+            else:
+                setattr(event, key, value)
         else:
             raise ValueError(f"Invalid field: {key}")
 
-    db.commit()
+    db.session.commit()
     return event.to_dict()
 
 def delete_event(event_id):

@@ -6,6 +6,11 @@ import Events from './pages/Events';
 import Resources from './pages/Resources';
 import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
+import Accident from './pages/Accident';
+import CreateAccident from './pages/CreateAccident';
+import UpdateAccident from './pages/UpdateAccident'; 
+import UpdateEvent from './pages/UpdateEvent';
+import CreateHospital from './pages/CreateHospital';
 
 function App() {
   const navbarLinks = [
@@ -24,6 +29,12 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/accidents" element={<Accident />} />
+          <Route path="/create-accident" element={<CreateAccident />} />
+          <Route path="/update-accident/:id" element={<UpdateAccident />} />
+          <Route path="/update-event/:eventId" element={<UpdateEvent />} />
+          <Route path="/create-hospital" element={<CreateHospital />} />
+
         </Routes>
       </div>
     </Router>

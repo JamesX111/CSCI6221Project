@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Events.css';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/api/get_events', { method: 'POST' })
+    fetch('http://127.0.0.1:5000/api/events/get_all', { method: 'POST' })
       .then(res => res.json())
       .then(data => setEvents(data))
       .catch(err => console.error(err));
   }, []);
+
+  const handleRowClick = (eventId) => {
+    navigate(`/update-event/${eventId}`);
+  };
 
   return (
     <div className="events-page">
@@ -36,7 +41,11 @@ const Events = () => {
         </thead>
         <tbody>
           {events.map(e => (
-            <tr key={e.id}>
+            <tr
+              key={e.id}
+              style={{ cursor: 'pointer' }}
+              onClick={() => handleRowClick(e.id)}
+            >
               <td>{e.id}</td>
               <td>{e.event_type}</td>
               <td>{e.description}</td>

@@ -9,6 +9,7 @@ class Event(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
 
+
     # Event metadata
     event_type = db.Column(db.String(50), nullable=False)  # e.g. 'Consultation', 'Surgery', 'Follow-up'
     description = db.Column(db.Text, nullable=True)

@@ -15,3 +15,4 @@ from .patient import Patient
 from .event import Event
 from .hospital import Hospital
 from .bed_occupancy import BedOccupancy
+from .accident import Accident

@@ -1,72 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'react-bootstrap';
+import { Table, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const Resources = () => {
   const [hospitals, setHospitals] = useState([]);
-  const [beds, setBeds] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('http://127.0.0.1:5000/api/get_hospitals', { method: 'POST' })
       .then(res => res.json())
       .then(data => setHospitals(data))
       .catch(err => console.error(err));
-
-    fetch('http://127.0.0.1:5000/api/get_bedding', { method: 'POST' })
-      .then(res => res.json())
-      .then(data => setBeds([data]))
-      .catch(err => console.error(err));
   }, []);
 
   return (
-    <div>
-      <h2>Hospital Resources</h2>
+    <div style={{ padding: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2 style={{ color: '#0b3d91' }}>Hospital Resources</h2>
+        <Button
+          style={{
+            backgroundColor: 'white',
+            color: 'black',
+            border: '2px solid black',
+            borderRadius: '8px',
+            fontWeight: 500,
+            padding: '6px 16px',
+            transition: 'all 0.25s ease-in-out'
+          }}
+          onMouseOver={(e) => { e.target.style.backgroundColor = 'black'; e.target.style.color = 'white'; }}
+          onMouseOut={(e) => { e.target.style.backgroundColor = 'white'; e.target.style.color = 'black'; }}
+          onClick={() => navigate('/create-hospital')}
+        >
+          Create Hospital
+        </Button>
+      </div>
 
-      <h4 className="mt-4">Hospitals</h4>
-      <Table striped bordered hover>
+      <Table striped bordered hover style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
         <thead>
           <tr>
-            <th>ID</th><th>Name</th><th>Address</th><th>Phone</th>
-            <th>Email</th><th>Departments</th>
+            <th style={{ width: '20%' }}>ID</th>
+            <th style={{ width: '20%' }}>Name</th>
+            <th style={{ width: '20%' }}>Address</th>
+            <th style={{ width: '20%' }}>Number of Doctors</th>
+            <th style={{ width: '20%' }}>Number of Beds</th>
           </tr>
         </thead>
         <tbody>
           {hospitals.map(h => (
-            <tr key={h.id}>
-              <td>{h.id}</td>
-              <td>{h.name}</td>
-              <td>{h.address}</td>
-              <td>{h.phone}</td>
-              <td>{h.email}</td>
-              <td>
-                {Object.keys(h.departments)
-                  .filter(dep => h.departments[dep])
-                  .join(', ') || 'None'}
-              </td>
+            <tr
+              key={h.id}
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate(`/update-hospital/${h.id}`)}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f6ff'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <td style={{ width: '20%' }}>{h.id}</td>
+              <td style={{ width: '20%' }}>{h.name}</td>
+              <td style={{ width: '20%' }}>{h.address}</td>
+              <td style={{ width: '20%' }}>{h.doctors ? h.doctors.length : 0}</td>
+              <td style={{ width: '20%' }}>{h.beds ? h.beds.length : 0}</td>
             </tr>
           ))}
         </tbody>
       </Table>
-
-      <h4 className="mt-5">Bed Occupancy</h4>
-      {beds.length > 0 ? (
-        <Table striped bordered hover>
-          <thead>
-            <tr><th>Bed ID</th><th>Ward</th><th>Status</th><th>Last Updated</th></tr>
-          </thead>
-          <tbody>
-            {beds.map(b => (
-              <tr key={b.bed_id}>
-                <td>{b.bed_id}</td>
-                <td>{b.ward}</td>
-                <td>{b.status}</td>
-                <td>{b.last_updated}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      ) : (
-        <p>No bed occupancy data found.</p>
-      )}
     </div>
   );
 };

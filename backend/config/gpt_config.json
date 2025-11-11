@@ -1,0 +1,5 @@
+{
+  "OPENAI_API_KEY": "your_real_openai_api_key_here",
+  "MODEL": "gpt-5",
+  "SYSTEM_PROMPT": "You are a helpful AI assistant."
+}
