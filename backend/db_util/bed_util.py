@@ -65,3 +65,7 @@ def delete_bed(bed_id):
     db.session.delete(bed)
     db.session.commit()
     return {"message": f"Bed with id {bed_id} has been deleted."}
+
+def get_beds_by_hospital(hospital_id):
+    beds = BedOccupancy.query.filter_by(hospital_id=hospital_id).all()
+    return [bed.to_dict() for bed in beds]

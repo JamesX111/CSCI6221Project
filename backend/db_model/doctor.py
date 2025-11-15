@@ -7,6 +7,7 @@ class Doctor(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=True)
     phone = db.Column(db.String(20), nullable=True)
     specialty = db.Column(db.String(100), nullable=True)
+    available = db.Column(db.Boolean, default=True, nullable=False)
 
     # Department is a string, not a relationship
     department = db.Column(db.String(50), nullable=False)  # e.g., 'Cardiology', 'Emergency'
@@ -26,6 +27,7 @@ class Doctor(db.Model):
             'phone': self.phone,
             'specialty': self.specialty,
             'department': self.department,
+            'available': self.available,
             'hospital': {
                 'id': self.hospital.id,
                 'name': self.hospital.name
