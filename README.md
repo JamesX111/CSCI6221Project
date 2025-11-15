@@ -10,4 +10,13 @@
 * put correct format of name into app.py should work
 ```
 DATABASE_URL=postgresql://username:password@hostname:port/database_name
+
+
 ```
+
+
+## How to run the Project
+* open one terminal and cd to frontend
+* run command `npm start`
+* open another terminal and cd to backend
+* run command `python app.py`
