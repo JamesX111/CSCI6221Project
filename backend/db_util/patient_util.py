@@ -79,7 +79,39 @@ def get_patient(identifier):
 # ---------------------------------------------------
 # Get all patients
 # ---------------------------------------------------
+import sqlite3
+import os
+
 def get_all_patients():
-    """Retrieve all patients."""
-    patients = Patient.query.all()
-    return [p.to_dict() for p in patients] if hasattr(Patient, 'to_dict') else patients
+    """Retrieve all patients directly from SQLite (readable DB)."""
+    db_path = os.path.join(os.path.dirname(__file__), "../../data/hospital_raw.db")
+
+    if not os.path.exists(db_path):
+        print(f"[ERROR] Database not found at: {db_path}")
+        return []
+
+    query = """
+        SELECT 
+            patient_Id AS id,
+            FName || ' ' || LName AS name,
+            email,
+            contact_No AS phone,
+            Gender AS gender,
+            pt_Address AS address
+        FROM patients
+        LIMIT 100
+    """
+
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+
+    except Exception as e:
+        print(f"[ERROR] Database query failed: {e}")
+        return []
+

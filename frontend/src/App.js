@@ -6,6 +6,9 @@ import Events from './pages/Events';
 import Resources from './pages/Resources';
 import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
+import './pages/global.css';
+import Forecast from "./pages/Forecast";
+
 
 function App() {
   const navbarLinks = [
@@ -24,6 +27,7 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/forecast" element={<Forecast />} />
         </Routes>
       </div>
     </Router>

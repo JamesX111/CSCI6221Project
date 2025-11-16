@@ -18,7 +18,7 @@ const Resources = () => {
   }, []);
 
   return (
-    <div>
+    <div className="container">
       <h2>Hospital Resources</h2>
 
       <h4 className="mt-4">Hospitals</h4>

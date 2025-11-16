@@ -5,14 +5,18 @@ const Patients = () => {
   const [patients, setPatients] = useState([]);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/api/patient/get_all', { method: 'POST' })
-      .then(res => res.json())
+    fetch('http://127.0.0.1:5000/api/get_patients')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => setPatients(data))
-      .catch(err => console.error(err));
+      .catch(err => console.error("Error fetching patients:", err));
   }, []);
+  
 
   return (
-    <div>
+    <div className="container">
       <h2>Patient List</h2>
       <Table striped bordered hover>
         <thead>

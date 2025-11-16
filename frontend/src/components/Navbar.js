@@ -46,15 +46,15 @@ const NavBar = () => (
           marginRight: '40px',
         }}
       >
-        <Nav.Link as={Link} to="/patients" className="custom-nav-link">
-          Patients
-        </Nav.Link>
-        <Nav.Link as={Link} to="/events" className="custom-nav-link">
-          Events
-        </Nav.Link>
-        <Nav.Link as={Link} to="/resources" className="custom-nav-link">
-          Resources
-        </Nav.Link>
+        <div className="navbar">
+          <div className="brand"></div>
+          <div>
+            <a href="/patients">Patients</a>
+            <a href="/events">Events</a>
+            <a href="/resources">Resources</a>
+            <a href="/forecast">Forecast</a>
+          </div>
+        </div>
       </Nav>
     </Container>
   </Navbar>
