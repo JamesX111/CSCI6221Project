@@ -1,7 +1,12 @@
 # create, update, delete and get doctor using table defined in db_model/doctor.py
-from db_model import db, Doctor, Hospital
+# from backend.db_model import db
+
+
 
 def create_doctor(doctor_data):
+    from backend.db_model import db
+    from backend.db_model.doctor import Doctor
+    from backend.db_model.hospital import Hospital
     if 'name' not in doctor_data or not doctor_data['name']:
         raise ValueError("Missing required field: name")
     if 'department' not in doctor_data or not doctor_data['department']:
@@ -28,6 +33,9 @@ def create_doctor(doctor_data):
 
 
 def get_doctor(doctor_id):
+    from backend.db_model import db
+    from backend.db_model.doctor import Doctor
+    from backend.db_model.hospital import Hospital
     doctor = Doctor.query.get(doctor_id)
     if not doctor:
         raise ValueError(f"Doctor with id {doctor_id} does not exist.")
@@ -35,11 +43,17 @@ def get_doctor(doctor_id):
 
 
 def get_all_doctors():
+    from backend.db_model import db
+    from backend.db_model.doctor import Doctor
+    from backend.db_model.hospital import Hospital
     doctors = Doctor.query.all()
     return [doctor.to_dict() for doctor in doctors]
 
 
 def get_doctors_by_hospital(hospital_id):
+    from backend.db_model import db
+    from backend.db_model.doctor import Doctor
+    from backend.db_model.hospital import Hospital
     hospital = Hospital.query.get(hospital_id)
     if not hospital:
         raise ValueError(f"Hospital with id {hospital_id} does not exist.")
@@ -48,6 +62,9 @@ def get_doctors_by_hospital(hospital_id):
 
 
 def get_doctors_by_department(department):
+    from backend.db_model import db
+    from backend.db_model.doctor import Doctor
+    from backend.db_model.hospital import Hospital
     if not department:
         raise ValueError("Department must be provided.")
     doctors = Doctor.query.filter_by(department=department).all()
@@ -55,6 +72,9 @@ def get_doctors_by_department(department):
 
 
 def update_doctor(doctor_id, update_data):
+    from backend.db_model import db
+    from backend.db_model.doctor import Doctor
+    from backend.db_model.hospital import Hospital
     doctor = Doctor.query.get(doctor_id)
     if not doctor:
         raise ValueError(f"Doctor with id {doctor_id} does not exist.")
@@ -78,6 +98,9 @@ def update_doctor(doctor_id, update_data):
 
 
 def delete_doctor(doctor_id):
+    from backend.db_model import db
+    from backend.db_model.doctor import Doctor
+    from backend.db_model.hospital import Hospital
     doctor = Doctor.query.get(doctor_id)
     if not doctor:
         raise ValueError(f"Doctor with id {doctor_id} does not exist.")

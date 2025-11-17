@@ -13,8 +13,8 @@ class Patient(db.Model):
     address = db.Column(db.String(255), nullable=True)
 
     # Password fields
-    password_hash = db.Column(db.String(255), nullable=False)
-    password_salt = db.Column(db.String(32), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
+    password_salt = db.Column(db.String(32), nullable=True)
 
     # Relationship to doctor
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=True)

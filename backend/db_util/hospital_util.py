@@ -1,7 +1,12 @@
 # create, update, delete and get hospital using table defined in db_model/hospital.py
-from db_model import db, Hospital
+# from backend.db_model import db
+
+from backend.db_model.hospital import Hospital
+
 
 def create_hospital(hospital_data):
+    from backend.db_model import db
+    from backend.db_model.hospital import Hospital
     """
     Create a new Hospital record in the database.
     hospital_data should be a dict containing:
@@ -43,6 +48,8 @@ def create_hospital(hospital_data):
 
 
 def get_hospital(hospital_id):
+    from backend.db_model import db
+    from backend.db_model.hospital import Hospital
     hospital = Hospital.query.get(hospital_id)
     if not hospital:
         raise ValueError(f"Hospital with id {hospital_id} does not exist.")
@@ -55,6 +62,8 @@ def get_all_hospitals():
 
 
 def update_hospital(hospital_id, update_data):
+    from backend.db_model import db
+    from backend.db_model.hospital import Hospital
     hospital = Hospital.query.get(hospital_id)
     if not hospital:
         raise ValueError(f"Hospital with id {hospital_id} does not exist.")
@@ -78,6 +87,8 @@ def update_hospital(hospital_id, update_data):
 
 
 def delete_hospital(hospital_id):
+    from backend.db_model import db
+    from backend.db_model.hospital import Hospital
     hospital = Hospital.query.get(hospital_id)
     if not hospital:
         raise ValueError(f"Hospital with id {hospital_id} does not exist.")

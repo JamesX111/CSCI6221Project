@@ -1,7 +1,7 @@
 
 from flask import Blueprint, request, jsonify
 from datetime import datetime
-from db_util import patient_util
+from backend.db_util import patient_util
 
 
 bp = Blueprint('patient', __name__, url_prefix='/api/patient')

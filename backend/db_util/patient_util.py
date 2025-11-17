@@ -1,14 +1,30 @@
 from datetime import datetime
-from db_model import db, Patient
+import secrets
+
 # ---------------------------------------------------
 # Create a new patient
 # ---------------------------------------------------
 def create_patient(patient_data):
+    from backend.db_model import db
+    from backend.db_model.patient import Patient
     """Create a new Patient record in the database."""
     required_fields = ['name', 'email']
     for field in required_fields:
         if field not in patient_data or not patient_data[field]:
             raise ValueError(f"Missing required field: {field}")
+
+    # ---- AUTO-GENERATE UNIQUE PHONE NUMBER IF MISSING OR SIM DEFAULT ----
+    if not patient_data.get("phone") or patient_data["phone"] == "000-000-0000":
+        unique_number = secrets.randbelow(10**10)
+        patient_data["phone"] = f"SIM-{unique_number}"
+
+    # ---- AUTO-GENERATE UNIQUE EMAIL IF SIM DEFAULT OR DUPLICATE ----
+    base_email = patient_data.get("email", "")
+    if base_email.startswith("simpatient"):
+        unique_part = secrets.randbelow(10**10)
+        patient_data["email"] = f"sim{unique_part}@simulation.com"
+
+
 
     # Create new Patient instance
     new_patient = Patient(
@@ -21,21 +37,22 @@ def create_patient(patient_data):
         doctor_id=patient_data.get('doctor_id'),
     )
 
-    # Use model’s password setter for hashing
-    if 'password' in patient_data and patient_data['password']:
-        new_patient.password = patient_data['password']
+    # Always assign a password (required by ORM)
+    new_patient.password = patient_data.get("password", "default123")
 
-    # Save
     db.session.add(new_patient)
     db.session.commit()
 
     return new_patient.to_dict() if hasattr(new_patient, 'to_dict') else new_patient
 
 
+
 # ---------------------------------------------------
 # Update an existing patient
 # ---------------------------------------------------
 def update_patient(patient_id, update_data):
+    from backend.db_model import db
+    from backend.db_model.patient import Patient
     """Update patient details by ID."""
     patient = Patient.query.get(patient_id)
     if not patient:
@@ -55,6 +72,8 @@ def update_patient(patient_id, update_data):
 # Get a patient by ID **or** email
 # ---------------------------------------------------
 def get_patient(identifier):
+    from backend.db_model import db
+    from backend.db_model.patient import Patient
     """
     Retrieve a patient by either ID (int) or email (str).
     Example:
