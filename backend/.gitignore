@@ -1,5 +1,6 @@
 db_model/__pycache__
 interfaces/__pycache__
 routes/__pycache__
-*/__pycache__
+db_util/__pycache__
+simulation/__pycache__
 __pycache__

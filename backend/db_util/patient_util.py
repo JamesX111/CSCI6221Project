@@ -8,7 +8,7 @@ def create_patient(patient_data):
     from backend.db_model import db
     from backend.db_model.patient import Patient
     """Create a new Patient record in the database."""
-    required_fields = ['name', 'email']
+    required_fields = ['name']
     for field in required_fields:
         if field not in patient_data or not patient_data[field]:
             raise ValueError(f"Missing required field: {field}")
@@ -20,9 +20,10 @@ def create_patient(patient_data):
 
     # ---- AUTO-GENERATE UNIQUE EMAIL IF SIM DEFAULT OR DUPLICATE ----
     base_email = patient_data.get("email", "")
-    if base_email.startswith("simpatient"):
+    if base_email.startswith("simpatient") or (base_email == ""):
         unique_part = secrets.randbelow(10**10)
         patient_data["email"] = f"sim{unique_part}@simulation.com"
+    
 
 
 
