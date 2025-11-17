@@ -5,6 +5,7 @@ class Bed(db.Model):
     __tablename__ = 'bed'
     bed_No = db.Column(db.Integer, primary_key=True)  # Primary key: bed number
     ward_No = db.Column(db.Integer, nullable=False)  # Ward identifier
+    available = db.Column(db.String(10), nullable=False,default="Available")
 
     # Optional: add a relationship to Ward model if you have one
     # ward = db.relationship('Ward', backref='beds', lazy=True)
@@ -15,5 +16,6 @@ class Bed(db.Model):
     def to_dict(self):
         return {
             'bed_No': self.bed_No,
-            'ward_No': self.ward_No
+            'ward_No': self.ward_No,
+            'available': self.available
         }

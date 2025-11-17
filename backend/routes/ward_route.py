@@ -20,7 +20,7 @@ def create_ward_route():
 # -------------------------------------------------------
 # GET BY ID
 # -------------------------------------------------------
-@bp.route("/get/<int:ward_no>", methods=["GET"])
+@bp.route("/get/<int:ward_no>", methods=["POST"])
 def get_ward_route(ward_no):
     ward = WardService.get_by_id(ward_no)
     if ward:
@@ -31,7 +31,7 @@ def get_ward_route(ward_no):
 # -------------------------------------------------------
 # GET BY DEPARTMENT
 # -------------------------------------------------------
-@bp.route("/get_by_department/<int:dept_id>", methods=["GET"])
+@bp.route("/get_by_department/<int:dept_id>", methods=["POST"])
 def get_by_department_route(dept_id):
     wards = WardService.get_by_department(dept_id)
     return jsonify(wards), 200

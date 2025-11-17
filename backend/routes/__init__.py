@@ -12,6 +12,7 @@ from .room_route import bp as room_bp
 from .staff_shift_route import bp as staff_shift_bp
 from .surgery_record_route import bp as surgery_record_bp
 from .ward_route import bp as ward_bp
+from .department_route import bp as department_bp
 
 def register_routes(app):
     app.register_blueprint(gpt_bp)
@@ -28,3 +29,4 @@ def register_routes(app):
     app.register_blueprint(staff_shift_bp)
     app.register_blueprint(surgery_record_bp)
     app.register_blueprint(ward_bp)
+    app.register_blueprint(department_bp)

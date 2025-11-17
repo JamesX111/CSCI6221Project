@@ -86,7 +86,7 @@ def reset_database_route():
 @ app.route('/api/insert_mock', methods=['POST'])
 def insert_mock_data_route():
     # Implement the logic to insert mock data here
-    insert_mock_data()
+    insert_mock_data(num_rows=1000)
     from interfaces import StaffShiftService
     patients = StaffShiftService.get_all_shifts()
     print(f"Number of patients after mock data insertion: {len(patients)}")

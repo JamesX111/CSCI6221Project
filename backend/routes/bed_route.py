@@ -20,7 +20,7 @@ def create_bed_route():
 # ----------------------------------
 # GET BY ID (get_bed_by_id)
 # ----------------------------------
-@bp.route("/get/<int:bed_no>", methods=["GET"])
+@bp.route("/get/<int:bed_no>", methods=["POST"])
 def get_bed_by_id_route(bed_no):
     bed = BedService.get_bed_by_id(bed_no)
     if bed:
@@ -40,7 +40,7 @@ def get_beds_by_ward_route(ward_no):
 # ----------------------------------
 # GET ALL (get_all_beds)
 # ----------------------------------
-@bp.route("/get_all", methods=["GET"])
+@bp.route("/get_all", methods=["POST"])
 def get_all_beds_route():
     beds = BedService.get_all_beds()
     return jsonify(beds), 200

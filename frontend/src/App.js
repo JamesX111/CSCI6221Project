@@ -10,12 +10,13 @@ import CreateAccident from './pages/CreateAccident';
 import UpdateAccident from './pages/UpdateAccident'; 
 import UpdateEvent from './pages/UpdateEvent';
 import CreateHospital from './pages/CreateHospital';
-import UpdateHospital from './pages/UpdateHospital';
 import CreateBed from './pages/CreateBed';
 import UpdateBed from './pages/UpdateBed';
 import CreateDoctor from './pages/CreateDoctor';
 import UpdateDoctor from './pages/UpdateDoctor';
 import Records from './pages/Records';
+import UpdatePatient from './pages/UpdatePatient';
+import UpdateWard from './pages/UpdateWard';
 
 function App() {
   const navbarLinks = [
@@ -39,11 +40,12 @@ function App() {
           <Route path="/update-accident/:id" element={<UpdateAccident />} />
           <Route path="/update-event/:eventId" element={<UpdateEvent />} />
           <Route path="/create-hospital" element={<CreateHospital />} />
-          <Route path="/update-hospital/:hospitalId" element={<UpdateHospital />} />
           <Route path="/create-bed/:hospitalId" element={<CreateBed />} />
           <Route path="/update-bed/:bedId" element={<UpdateBed />} />
           <Route path="/create-doctor/:hospitalId" element={<CreateDoctor />} />
           <Route path="/update-doctor/:doctorId" element={<UpdateDoctor />} />
+          <Route path="/update-patient/:patientId" element={<UpdatePatient />} />
+          <Route path="/update-ward/:wardNo" element={<UpdateWard />} />
 
         </Routes>
       </div>

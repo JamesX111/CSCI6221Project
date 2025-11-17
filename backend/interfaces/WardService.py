@@ -77,5 +77,5 @@ class WardService:
     # GET ALL (sorted by ward_Name)
     @staticmethod
     def get_all():
-        wards = Ward.query.order_by(Ward.ward_Name.asc()).all()
+        wards = Ward.query.all()
         return [w.to_dict() for w in wards]

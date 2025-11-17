@@ -36,12 +36,17 @@ class PatientService:
     # UPDATE
     @staticmethod
     def update_patient(patient_id, data):
+        from datetime import datetime
         patient = Patient.query.get(patient_id)
         if not patient:
             return None
 
         try:
             for key, value in data.items():
+                if key == "Date_Of_Birth" and isinstance(value, str):
+                    # Convert string to date object
+                    value = datetime.strptime(value, "%Y-%m-%d").date()
+
                 if key != "patient_Id" and hasattr(patient, key):
                     setattr(patient, key, value)
 
@@ -51,6 +56,7 @@ class PatientService:
         except Exception as e:
             db.session.rollback()
             raise e
+
 
     # DELETE
     @staticmethod

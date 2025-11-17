@@ -20,7 +20,7 @@ def create_patient_route():
 # ----------------------------------
 # GET BY ID (get_patient_by_id)
 # ----------------------------------
-@bp.route("/get/<int:patient_id>", methods=["GET"])
+@bp.route("/get/<int:patient_id>", methods=["POST"])
 def get_patient_by_id_route(patient_id):
     patient = PatientService.get_patient_by_id(patient_id)
     if patient:
@@ -31,7 +31,7 @@ def get_patient_by_id_route(patient_id):
 # ----------------------------------
 # GET BY GENDER (get_patients_by_gender)
 # ----------------------------------
-@bp.route("/get_by_gender/<string:gender>", methods=["GET"])
+@bp.route("/get_by_gender/<string:gender>", methods=["POST"])
 def get_patients_by_gender_route(gender):
     patients = PatientService.get_patients_by_gender(gender)
     return jsonify(patients), 200
