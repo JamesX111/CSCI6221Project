@@ -38,9 +38,9 @@ const Events = () => {
           {events.map(e => (
             <tr key={e.id}>
               <td>{e.id}</td>
-              <td>{e.event_type}</td>
+              <td>{e.type}</td>
               <td>{e.description}</td>
-              <td>{e.scheduled_at}</td>
+              <td>{e.scheduled}</td>
               <td>{e.status}</td>
               <td>{e.doctor ? e.doctor.name : '—'}</td>
               <td>{e.patient ? e.patient.name : '—'}</td>
