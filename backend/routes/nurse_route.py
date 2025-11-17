@@ -49,7 +49,7 @@ def get_nurses_by_department_route(dept_id):
 # ----------------------------------
 # GET ALL (get_all_nurses)
 # ----------------------------------
-@bp.route("/get_all", methods=["GET"])
+@bp.route("/get_all", methods=["POST"])
 def get_all_nurses_route():
     nurses = NurseService.get_all_nurses()
     return jsonify(nurses), 200

@@ -49,7 +49,7 @@ def get_helpers_by_department_route(dept_id):
 # ----------------------------------
 # GET ALL (get_all_helpers)
 # ----------------------------------
-@bp.route("/get_all", methods=["GET"])
+@bp.route("/get_all", methods=["POST"])
 def get_all_helpers_route():
     helpers = HelperService.get_all_helpers()
     return jsonify(helpers), 200

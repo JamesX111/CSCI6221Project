@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-def insert_mock_data(file_path='Data/Hospital_Management_System.xlsx', num_rows=10):
+def insert_mock_data(file_path='Data/Hospital_Management_System.xlsx', num_rows=20):
     """Insert mock data from an Excel file into the database safely and avoid duplicates."""
     xls = pd.ExcelFile(file_path)
 
@@ -106,6 +106,60 @@ def insert_mock_data(file_path='Data/Hospital_Management_System.xlsx', num_rows=
         db.session.add(doctor)
 
     db.session.commit()
+
+    # ---- -------- Helper data -----------
+    df_helper = pd.read_excel(xls, 'Helpers').head(num_rows)
+    from .Helper import Helper
+    for _, row in df_helper.iterrows():
+        if pd.isnull(row.get('helper_Id')):
+            print(f"Skipping helper row due to missing helper_Id: {row.to_dict()}")
+            continue
+
+        # Skip if helper already exists
+        exists = Helper.query.filter_by(helper_Id=row['helper_Id']).first()
+        if exists:
+            print(f"Skipping helper {row['helper_Id']}, already exists.")
+            continue
+
+        helper = Helper(
+            helper_Id=row['helper_Id'],
+            dept_Id=row['dept_Id'],
+            FName=row['FName'],
+            LName=row['LName'],
+            Gender=row['Gender'],
+            contact_No=row['contact_No']
+        )
+        db.session.add(helper)
+    db.session.commit()
+
+
+
+    # ----------- Nurse data -----------
+    df_nurse = pd.read_excel(xls, 'Nurse').head(num_rows)
+    from .Nurse import Nurse
+
+    for _, row in df_nurse.iterrows():
+        if pd.isnull(row.get('nurse_Id')):
+            print(f"Skipping nurse row due to missing nurse_Id: {row.to_dict()}")
+            continue
+
+        exists = Nurse.query.filter_by(nurse_Id=row['nurse_Id']).first()
+        if exists:
+            print(f"Skipping nurse {row['nurse_Id']}, already exists.")
+            continue
+
+        nurse = Nurse(
+            nurse_Id=row['nurse_Id'],
+            dept_Id=row['dept_Id'],
+            FName=row['FName'],
+            LName=row['LName'],
+            Gender=row['Gender'],
+            conatct_No=row.get('conatct_No')  # optional
+        )
+        db.session.add(nurse)
+
+    db.session.commit()
+
 
     print("✅ Mock data inserted successfully, duplicates skipped.")
 
