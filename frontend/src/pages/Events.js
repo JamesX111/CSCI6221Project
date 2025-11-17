@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button } from 'react-bootstrap';
+import { Table, Button, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './Events.css';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     fetch('http://127.0.0.1:5000/api/get_events', { method: 'POST' })
@@ -12,6 +13,11 @@ const Events = () => {
       .then(data => setEvents(data))
       .catch(err => console.error(err));
   }, []);
+
+  // Filter events based on selected status
+  const filteredEvents = statusFilter === 'all'
+    ? events
+    : events.filter(e => e.status === statusFilter);
 
   return (
     <div className="events-page">
@@ -21,6 +27,22 @@ const Events = () => {
           <Button className="add-event-btn">Add Event</Button>
         </Link>
       </div>
+
+      {/* Status Dropdown */}
+      <Form.Group className="mb-3" controlId="statusFilter">
+        <Form.Label>Filter by Status</Form.Label>
+        <Form.Control
+          as="select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="No-Show">No-Show</option>
+        </Form.Control>
+      </Form.Group>
 
       <Table striped bordered hover className="events-table">
         <thead>
@@ -35,7 +57,7 @@ const Events = () => {
           </tr>
         </thead>
         <tbody>
-          {events.map(e => (
+          {filteredEvents.map(e => (
             <tr key={e.id}>
               <td>{e.id}</td>
               <td>{e.event_type}</td>
