@@ -80,3 +80,8 @@ def delete_event(event_id):
     db.delete(event)
     db.commit()
     return {"message": f"Event with id {event_id} has been deleted."}
+
+def get_all_events():
+    from backend.db_model import db, Event
+    events = Event.query.all()
+    return [event.to_dict() for event in events] if hasattr(Event, "to_dict") else events

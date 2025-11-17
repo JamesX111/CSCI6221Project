@@ -12,3 +12,8 @@ def create_event():
     data = request.json
     event = event_util.create_event(data)
     return jsonify(event.to_dict()), 201
+
+@bp.route('/get_all', methods=['GET'])
+def get_all_events():
+    events = Event.query.all()
+    return jsonify([e.to_dict() for e in events]), 200
