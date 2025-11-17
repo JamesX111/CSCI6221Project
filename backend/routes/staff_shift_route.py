@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from interfaces import StaffShiftService
 
-bp = Blueprint("shifts", __name__, url_prefix="/api/shifts")
+bp = Blueprint("shifts", __name__, url_prefix="/api/staff_shifts")
 
 
 # -------------------------------------------------------
@@ -20,7 +20,7 @@ def create_shift_route():
 # -------------------------------------------------------
 # GET BY ID (get_shift_by_id)
 # -------------------------------------------------------
-@bp.route("/get/<int:shift_id>", methods=["GET"])
+@bp.route("/get/<int:shift_id>", methods=["POST"])
 def get_shift_route(shift_id):
     shift = StaffShiftService.get_shift_by_id(shift_id)
     if shift:
@@ -31,7 +31,7 @@ def get_shift_route(shift_id):
 # -------------------------------------------------------
 # GET ALL (get_all_shifts)
 # -------------------------------------------------------
-@bp.route("/get_all", methods=["GET"])
+@bp.route("/get_all", methods=["POST"])
 def get_all_shifts_route():
     shifts = StaffShiftService.get_all_shifts()
     return jsonify(shifts), 200
@@ -40,7 +40,7 @@ def get_all_shifts_route():
 # -------------------------------------------------------
 # GET BY DOCTOR (get_by_doctor)
 # -------------------------------------------------------
-@bp.route("/get_by_doctor/<int:doct_id>", methods=["GET"])
+@bp.route("/get_by_doctor/<int:doct_id>", methods=["POST"])
 def get_by_doctor_route(doct_id):
     shifts = StaffShiftService.get_by_doctor(doct_id)
     return jsonify(shifts), 200
@@ -49,7 +49,7 @@ def get_by_doctor_route(doct_id):
 # -------------------------------------------------------
 # GET BY NURSE (get_by_nurse)
 # -------------------------------------------------------
-@bp.route("/get_by_nurse/<int:nurse_id>", methods=["GET"])
+@bp.route("/get_by_nurse/<int:nurse_id>", methods=["POST"])
 def get_by_nurse_route(nurse_id):
     shifts = StaffShiftService.get_by_nurse(nurse_id)
     return jsonify(shifts), 200
@@ -58,7 +58,7 @@ def get_by_nurse_route(nurse_id):
 # -------------------------------------------------------
 # GET BY HELPER (get_by_helper)
 # -------------------------------------------------------
-@bp.route("/get_by_helper/<int:helper_id>", methods=["GET"])
+@bp.route("/get_by_helper/<int:helper_id>", methods=["POST"])
 def get_by_helper_route(helper_id):
     shifts = StaffShiftService.get_by_helper(helper_id)
     return jsonify(shifts), 200

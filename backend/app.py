@@ -87,8 +87,8 @@ def reset_database_route():
 def insert_mock_data_route():
     # Implement the logic to insert mock data here
     insert_mock_data()
-    from interfaces import RoomRecordService
-    patients = RoomRecordService.get_all_records()
+    from interfaces import StaffShiftService
+    patients = StaffShiftService.get_all_shifts()
     print(f"Number of patients after mock data insertion: {len(patients)}")
     return jsonify({"message": "Mock data inserted!"})
 

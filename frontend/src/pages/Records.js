@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-const Events = () => {
+const Records = () => {
   const [bedRecords, setBedRecords] = useState([]);
   const [roomRecords, setRoomRecords] = useState([]);
   const [surgeryRecords, setSurgeryRecords] = useState([]);
+  const [staffShifts, setStaffShifts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +26,12 @@ const Events = () => {
     fetch('http://127.0.0.1:5000/api/surgeries/get_all', { method: 'POST' })
       .then(res => res.json())
       .then(data => setSurgeryRecords(data))
+      .catch(err => console.error(err));
+
+    // Fetch Staff Shifts
+    fetch('http://127.0.0.1:5000/api/staff_shifts/get_all', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => setStaffShifts(data))
       .catch(err => console.error(err));
   }, []);
 
@@ -167,8 +174,44 @@ const Events = () => {
           </tbody>
         </Table>
       </div>
+
+      {/* Staff Shifts */}
+      <h2 style={headerStyle}>Staff Shifts</h2>
+      <div style={tableContainerStyle}>
+        <Table striped bordered hover style={tableStyle}>
+          <thead>
+            <tr>
+              <th>Shift ID</th>
+              <th>Doctor</th>
+              <th>Nurse</th>
+              <th>Helper</th>
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {staffShifts.map(s => (
+              <tr key={s.shift_Id}
+                  style={rowHoverStyle}
+                  onClick={() => navigate(`/update-staff-shift/${s.shift_Id}`)}
+                  onMouseOver={e => handleRowHover(e, true)}
+                  onMouseOut={e => handleRowHover(e, false)}>
+                <td>{s.shift_Id}</td>
+                <td>{s.doctor_Name || '—'}</td>
+                <td>{s.nurse_Name || '—'}</td>
+                <td>{s.helper_Name || '—'}</td>
+                <td>{s.shift_Date}</td>
+                <td>{s.shift_Start}</td>
+                <td>{s.shift_End}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+
     </div>
   );
 };
 
-export default Events;
+export default Records;

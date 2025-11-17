@@ -255,5 +255,68 @@ def insert_mock_data(file_path='Data/Hospital_Management_System.xlsx', num_rows=
 
     db.session.commit()
 
+    # ----------- StaffShift data -----------
+    df_staff_shift = pd.read_excel(xls, 'StaffShift').head(num_rows)
+    from .StaffShift import StaffShift
+
+    for _, row in df_staff_shift.iterrows():
+        if pd.isnull(row.get('shift_Id')):
+            print(f"Skipping staff shift row due to missing shift_Id: {row.to_dict()}")
+            continue
+
+        exists = StaffShift.query.filter_by(shift_Id=row['shift_Id']).first()
+        if exists:
+            print(f"Skipping staff shift {row['shift_Id']}, already exists.")
+            continue
+
+        # Convert shift_Date to date
+        shift_date = row['shift_Date']
+        if pd.notnull(shift_date):
+            if isinstance(shift_date, pd.Timestamp):
+                shift_date = shift_date.date()
+            elif isinstance(shift_date, str):
+                try:
+                    shift_date = datetime.strptime(shift_date, "%Y-%m-%d").date()
+                except Exception:
+                    print(f"Invalid shift_Date for shift {row['shift_Id']}, skipping.")
+                    continue
+        else:
+            print(f"Missing shift_Date for shift {row['shift_Id']}, skipping.")
+            continue
+
+        # Convert shift_Start and shift_End to time
+        def to_time(val, field_name):
+            if pd.isnull(val):
+                return None
+            if isinstance(val, pd.Timestamp):
+                return val.time()
+            if isinstance(val, str):
+                try:
+                    return datetime.strptime(val, "%H:%M:%S").time()
+                except Exception:
+                    print(f"Invalid {field_name} for shift {row['shift_Id']}, skipping.")
+                    return None
+            if isinstance(val, datetime):
+                return val.time()
+            return val  # assume it's already a time object
+
+        shift_start = to_time(row['shift_Start'], 'shift_Start')
+        shift_end = to_time(row['shift_End'], 'shift_End')
+        if shift_start is None or shift_end is None:
+            continue
+
+        staff_shift = StaffShift(
+            shift_Id=row['shift_Id'],
+            doct_Id=row.get('doct_Id'),
+            nurse_Id=row.get('nurse_Id'),
+            helper_Id=row.get('helper_Id'),
+            shift_Date=shift_date,
+            shift_Start=shift_start,
+            shift_End=shift_end
+        )
+        db.session.add(staff_shift)
+
+    db.session.commit()
+
 
     print("✅ Mock data inserted successfully, duplicates skipped.")
