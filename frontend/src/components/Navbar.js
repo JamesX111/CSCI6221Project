@@ -20,7 +20,6 @@ const NavBar = () => (
         alignItems: 'center',
       }}
     >
-      {/* Left side: brand */}
       <Navbar.Brand
         as={Link}
         to="/"
@@ -36,23 +35,23 @@ const NavBar = () => (
         Hospital Management
       </Navbar.Brand>
 
-      {/* Right side: nav links */}
       <Nav
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '30px',
-          marginLeft: 'auto', // pushes to the right edge
+          marginLeft: 'auto',
           marginRight: '40px',
         }}
       >
         <div className="navbar">
           <div className="brand"></div>
           <div>
-            <a href="/patients">Patients</a>
-            <a href="/events">Events</a>
-            <a href="/resources">Resources</a>
-            <a href="/forecast">Forecast</a>
+            <Link to="/">Live Simulation</Link>
+            <Link to="/patients">Patients</Link>
+            <Link to="/events">Events</Link>
+            <Link to="/resources">Resources</Link>
+            <Link to="/forecast">Forecast</Link>
           </div>
         </div>
       </Nav>

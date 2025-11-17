@@ -1,9 +1,12 @@
 # create, update, delete and get event using table defined in db_models/event.py
-from db_model import db, Event
+# from backend.db_model import db
+
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 def create_event(event_data):
+    from backend.db_model import db
+    from backend.db_model.event import Event
     """
     Create a new Event record in the database.
     event_data should be a dict containing:
@@ -43,12 +46,16 @@ def create_event(event_data):
 
 
 def get_event(event_id):
+    from backend.db_model import db
+    from backend.db_model.event import Event
     event = Event.query.get(event_id)
     if not event:
         raise ValueError(f"Event with id {event_id} does not exist.")
     return event.to_dict()
 
 def update_event(event_id, update_data):
+    from backend.db_model import db
+    from backend.db_model.event import Event
     event = Event.query.get(event_id)
     if not event:
         raise ValueError(f"Event with id {event_id} does not exist.")
@@ -64,6 +71,8 @@ def update_event(event_id, update_data):
     return event.to_dict()
 
 def delete_event(event_id):
+    from backend.db_model import db
+    from backend.db_model.event import Event
     event = Event.query.get(event_id)
     if not event:
         raise ValueError(f"Event with id {event_id} does not exist.")
