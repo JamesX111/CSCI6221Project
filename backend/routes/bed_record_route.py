@@ -20,7 +20,7 @@ def create_bed_record_route():
 # ----------------------------------
 # GET ALL (get_all_bed_records)
 # ----------------------------------
-@bp.route("/get_all", methods=["GET"])
+@bp.route("/get_all", methods=["POST"])
 def get_all_bed_records_route():
     records = BedRecordService.get_all_bed_records()
     return jsonify(records), 200
@@ -29,7 +29,7 @@ def get_all_bed_records_route():
 # ----------------------------------
 # GET BY ID (same as admission_Id)
 # ----------------------------------
-@bp.route("/get/<int:admission_id>", methods=["GET"])
+@bp.route("/get/<int:admission_id>", methods=["POST"])
 def get_bed_record_by_id_route(admission_id):
     record = BedRecordService.get_bed_record_by_id(admission_id) \
         if hasattr(BedRecordService, "get_bed_record_by_id") else None
@@ -48,7 +48,7 @@ def get_bed_record_by_id_route(admission_id):
 # ----------------------------------
 # GET BY BED (get_records_by_bed)
 # ----------------------------------
-@bp.route("/get_by_bed/<int:bed_no>", methods=["GET"])
+@bp.route("/get_by_bed/<int:bed_no>", methods=["POST"])
 def get_records_by_bed_route(bed_no):
     records = BedRecordService.get_records_by_bed(bed_no)
     return jsonify(records), 200
@@ -57,7 +57,7 @@ def get_records_by_bed_route(bed_no):
 # ----------------------------------
 # GET BY PATIENT (get_records_by_patient)
 # ----------------------------------
-@bp.route("/get_by_patient/<int:patient_id>", methods=["GET"])
+@bp.route("/get_by_patient/<int:patient_id>", methods=["POST"])
 def get_records_by_patient_route(patient_id):
     records = BedRecordService.get_records_by_patient(patient_id)
     return jsonify(records), 200
@@ -66,7 +66,7 @@ def get_records_by_patient_route(patient_id):
 # ----------------------------------
 # GET BY NURSE (get_records_by_nurse)
 # ----------------------------------
-@bp.route("/get_by_nurse/<int:nurse_id>", methods=["GET"])
+@bp.route("/get_by_nurse/<int:nurse_id>", methods=["POST"])
 def get_records_by_nurse_route(nurse_id):
     records = BedRecordService.get_records_by_nurse(nurse_id)
     return jsonify(records), 200
@@ -75,7 +75,7 @@ def get_records_by_nurse_route(nurse_id):
 # ----------------------------------
 # GET BY HELPER (get_records_by_helper)
 # ----------------------------------
-@bp.route("/get_by_helper/<int:helper_id>", methods=["GET"])
+@bp.route("/get_by_helper/<int:helper_id>", methods=["POST"])
 def get_records_by_helper_route(helper_id):
     records = BedRecordService.get_records_by_helper(helper_id)
     return jsonify(records), 200

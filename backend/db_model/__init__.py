@@ -7,161 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-def insert_mock_data(file_path='Data/Hospital_Management_System.xlsx', num_rows=20):
-    """Insert mock data from an Excel file into the database safely and avoid duplicates."""
-    xls = pd.ExcelFile(file_path)
 
-    # ----------- Patient data -----------
-    df_patient = pd.read_excel(xls, 'Patients').head(num_rows)
-    from .Patient import Patient
-
-    for _, row in df_patient.iterrows():
-        if pd.isnull(row.get('patient_Id')):
-            print(f"Skipping patient row due to missing patient_Id: {row.to_dict()}")
-            continue
-
-        # Skip if patient already exists
-        exists = Patient.query.filter_by(patient_Id=row['patient_Id']).first()
-        if exists:
-            print(f"Skipping patient {row['patient_Id']}, already exists.")
-            continue
-
-        # Safely handle Date_Of_Birth
-        dob = row['Date_Of_Birth']
-        if pd.notnull(dob):
-            if isinstance(dob, pd.Timestamp):
-                dob = dob.date()
-            elif isinstance(dob, str):
-                try:
-                    dob = datetime.strptime(dob, '%Y-%m-%d').date()
-                except Exception:
-                    print(f"Invalid date format for patient {row['patient_Id']}, skipping.")
-                    continue
-        else:
-            print(f"Missing Date_Of_Birth for patient {row['patient_Id']}, skipping.")
-            continue
-
-        patient = Patient(
-            patient_Id=row['patient_Id'],
-            FName=row['FName'],
-            LName=row['LName'],
-            Date_Of_Birth=dob,
-            Gender=row['Gender'],
-            contact_No=row['contact_No'],
-            pt_Address=row['pt_Address']
-        )
-        db.session.add(patient)
-
-    db.session.commit()
-
-    # ----------- Ward data -----------
-    df_ward = pd.read_excel(xls, 'Ward').head(num_rows)
-    from .Ward import Ward
-
-    for _, row in df_ward.iterrows():
-        if pd.isnull(row.get('ward_No')):
-            print(f"Skipping ward row due to missing ward_No: {row.to_dict()}")
-            continue
-
-        # Skip if ward already exists
-        exists = Ward.query.filter_by(ward_No=row['ward_No']).first()
-        if exists:
-            print(f"Skipping ward {row['ward_No']}, already exists.")
-            continue
-
-        ward = Ward(
-            ward_No=row['ward_No'],
-            ward_Name=row['ward_Name'],
-            dept_Id=row['dept_Id']
-        )
-        db.session.add(ward)
-
-    db.session.commit()
-
-    # ----------- Doctor data -----------
-    df_doctor = pd.read_excel(xls, 'Doctor').head(num_rows)
-    from .Doctor import Doctor
-
-    for _, row in df_doctor.iterrows():
-        if pd.isnull(row.get('doct_Id')):
-            print(f"Skipping doctor row due to missing doct_Id: {row.to_dict()}")
-            continue
-
-        # Skip if doctor already exists
-        exists = Doctor.query.filter_by(doct_Id=row['doct_Id']).first()
-        if exists:
-            print(f"Skipping doctor {row['doct_Id']}, already exists.")
-            continue
-
-        doctor = Doctor(
-            doct_Id=row['doct_Id'],
-            dept_Id=row['dept_Id'],
-            FName=row['FName'],
-            LName=row['LName'],
-            Gender=row['Gender'],
-            contact_No=row['contact_No'],
-            surgeon_Type=row.get('surgeon_Type'),  # optional
-            office_No=row.get('office_No')         # optional
-        )
-        db.session.add(doctor)
-
-    db.session.commit()
-
-    # ---- -------- Helper data -----------
-    df_helper = pd.read_excel(xls, 'Helpers').head(num_rows)
-    from .Helper import Helper
-    for _, row in df_helper.iterrows():
-        if pd.isnull(row.get('helper_Id')):
-            print(f"Skipping helper row due to missing helper_Id: {row.to_dict()}")
-            continue
-
-        # Skip if helper already exists
-        exists = Helper.query.filter_by(helper_Id=row['helper_Id']).first()
-        if exists:
-            print(f"Skipping helper {row['helper_Id']}, already exists.")
-            continue
-
-        helper = Helper(
-            helper_Id=row['helper_Id'],
-            dept_Id=row['dept_Id'],
-            FName=row['FName'],
-            LName=row['LName'],
-            Gender=row['Gender'],
-            contact_No=row['contact_No']
-        )
-        db.session.add(helper)
-    db.session.commit()
-
-
-
-    # ----------- Nurse data -----------
-    df_nurse = pd.read_excel(xls, 'Nurse').head(num_rows)
-    from .Nurse import Nurse
-
-    for _, row in df_nurse.iterrows():
-        if pd.isnull(row.get('nurse_Id')):
-            print(f"Skipping nurse row due to missing nurse_Id: {row.to_dict()}")
-            continue
-
-        exists = Nurse.query.filter_by(nurse_Id=row['nurse_Id']).first()
-        if exists:
-            print(f"Skipping nurse {row['nurse_Id']}, already exists.")
-            continue
-
-        nurse = Nurse(
-            nurse_Id=row['nurse_Id'],
-            dept_Id=row['dept_Id'],
-            FName=row['FName'],
-            LName=row['LName'],
-            Gender=row['Gender'],
-            conatct_No=row.get('conatct_No')  # optional
-        )
-        db.session.add(nurse)
-
-    db.session.commit()
-
-
-    print("✅ Mock data inserted successfully, duplicates skipped.")
 
 
 
@@ -220,6 +66,9 @@ def init_db(app):
 
 
     print("✔ Database, routes, interfaces fully generated!")
+
+
+from .insert_mock import insert_mock_data
 
 from .Appointment import Appointment
 from .Bed import Bed

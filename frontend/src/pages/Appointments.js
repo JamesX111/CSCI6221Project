@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const Accident = () => {
+const Appointments = () => {
   const [accidents, setAccidents] = useState([]);
   const navigate = useNavigate();
 
@@ -94,4 +94,4 @@ const Accident = () => {
   );
 };
 
-export default Accident;
+export default Appointments;

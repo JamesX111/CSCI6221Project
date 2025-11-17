@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from interfaces import SurgeryRecordService
 
-bp = Blueprint("surgery", __name__, url_prefix="/api/surgery")
+bp = Blueprint("surgery", __name__, url_prefix="/api/surgeries")
 
 
 # -------------------------------------------------------
@@ -20,7 +20,7 @@ def create_surgery_route():
 # -------------------------------------------------------
 # GET BY ID
 # -------------------------------------------------------
-@bp.route("/get/<int:surgery_id>", methods=["GET"])
+@bp.route("/get/<int:surgery_id>", methods=["POST"])
 def get_surgery_route(surgery_id):
     surgery = SurgeryRecordService.get_by_id(surgery_id)
     if surgery:
@@ -31,7 +31,7 @@ def get_surgery_route(surgery_id):
 # -------------------------------------------------------
 # GET ALL
 # -------------------------------------------------------
-@bp.route("/get_all", methods=["GET"])
+@bp.route("/get_all", methods=["POST"])
 def get_all_surgeries_route():
     surgeries = SurgeryRecordService.get_all()
     return jsonify(surgeries), 200
@@ -40,7 +40,7 @@ def get_all_surgeries_route():
 # -------------------------------------------------------
 # GET BY PATIENT
 # -------------------------------------------------------
-@bp.route("/get_by_patient/<int:patient_id>", methods=["GET"])
+@bp.route("/get_by_patient/<int:patient_id>", methods=["POST"])
 def get_by_patient_route(patient_id):
     surgeries = SurgeryRecordService.get_by_patient(patient_id)
     return jsonify(surgeries), 200
@@ -49,7 +49,7 @@ def get_by_patient_route(patient_id):
 # -------------------------------------------------------
 # GET BY DOCTOR / SURGEON
 # -------------------------------------------------------
-@bp.route("/get_by_doctor/<int:doctor_id>", methods=["GET"])
+@bp.route("/get_by_doctor/<int:doctor_id>", methods=["POST"])
 def get_by_doctor_route(doctor_id):
     surgeries = SurgeryRecordService.get_by_doctor(doctor_id)
     return jsonify(surgeries), 200
@@ -58,7 +58,7 @@ def get_by_doctor_route(doctor_id):
 # -------------------------------------------------------
 # GET BY NURSE
 # -------------------------------------------------------
-@bp.route("/get_by_nurse/<int:nurse_id>", methods=["GET"])
+@bp.route("/get_by_nurse/<int:nurse_id>", methods=["POST"])
 def get_by_nurse_route(nurse_id):
     surgeries = SurgeryRecordService.get_by_nurse(nurse_id)
     return jsonify(surgeries), 200
@@ -67,7 +67,7 @@ def get_by_nurse_route(nurse_id):
 # -------------------------------------------------------
 # GET BY HELPER
 # -------------------------------------------------------
-@bp.route("/get_by_helper/<int:helper_id>", methods=["GET"])
+@bp.route("/get_by_helper/<int:helper_id>", methods=["POST"])
 def get_by_helper_route(helper_id):
     surgeries = SurgeryRecordService.get_by_helper(helper_id)
     return jsonify(surgeries), 200
@@ -76,7 +76,7 @@ def get_by_helper_route(helper_id):
 # -------------------------------------------------------
 # GET BY SURGERY TYPE
 # -------------------------------------------------------
-@bp.route("/get_by_type/<string:surgery_type>", methods=["GET"])
+@bp.route("/get_by_type/<string:surgery_type>", methods=["POST"])
 def get_by_surgery_type_route(surgery_type):
     surgeries = SurgeryRecordService.get_by_surgery_type(surgery_type)
     return jsonify(surgeries), 200

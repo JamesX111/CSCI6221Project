@@ -50,7 +50,7 @@ const NavBar = () => {
 
       {/* Right side: Links */}
       <div style={{ display: 'flex', gap: '1rem' }}>
-        {['Patients', 'Events', 'Resources', 'Accidents'].map((text) => (
+        {['Patients', 'Records', 'Resources', 'Appointments'].map((text) => (
           <Link
             key={text}
             to={`/${text.toLowerCase()}`}
