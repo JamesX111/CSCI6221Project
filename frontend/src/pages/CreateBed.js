@@ -6,22 +6,11 @@ const CreateBed = () => {
   const { hospitalId } = useParams();
 
   const [bedData, setBedData] = useState({
-    ward: "emergency", // default value
+    ward: "",           
     status: "unoccupied",
   });
 
   const [error, setError] = useState("");
-
-  const wards = [
-    "emergency",
-    "pediatrics",
-    "cardiology",
-    "oncology",
-    "neurology",
-    "orthopedics",
-    "radiology",
-    "maternity",
-  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,21 +48,17 @@ const CreateBed = () => {
       <h2 style={{ color: "#0b3d91", textAlign: "center" }}>Create Bed</h2>
       {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
 
-      {/* Ward Dropdown */}
+      {/* Ward TEXT INPUT */}
       <div style={{ marginBottom: "1.5rem" }}>
         <label>Ward</label>
-        <select
+        <input
+          type="text"
           name="ward"
+          placeholder="Enter ward name (e.g., emergency)"
           value={bedData.ward}
           onChange={handleChange}
           style={{ width: "100%", marginTop: "0.5rem", padding: "6px" }}
-        >
-          {wards.map((ward) => (
-            <option key={ward} value={ward}>
-              {ward.charAt(0).toUpperCase() + ward.slice(1)}
-            </option>
-          ))}
-        </select>
+        />
       </div>
 
       {/* Status Dropdown */}

@@ -1,58 +1,32 @@
 from . import db
-import secrets
-from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import date
 
 class Patient(db.Model):
-    """Patient model"""
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    phone = db.Column(db.String(20), unique=True, nullable=True)
-    gender = db.Column(db.String(10))  # 'male', 'female', 'other'
-    date_of_birth = db.Column(db.Date, nullable=True)
-    address = db.Column(db.String(255), nullable=True)
+    """Patient table"""
+    __tablename__ = 'patient'
 
-    # Password fields
-    password_hash = db.Column(db.String(255), nullable=False)
-    password_salt = db.Column(db.String(32), nullable=False)
+    patient_Id = db.Column(db.Integer, primary_key=True)
 
-    # Relationship to doctor
-    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=True)
-    doctor = db.relationship('Doctor', backref='patients', lazy=True)
+    FName = db.Column(db.String(100), nullable=False)
+    LName = db.Column(db.String(100), nullable=False)
 
-    @property
-    def password(self):
-        # Prevent direct access to password
-        raise AttributeError('password is not a readable attribute')
+    Gender = db.Column(db.String(10), nullable=False)
 
-    @password.setter
-    def password(self, password):
-        # Generate salt and hashed password
-        self.password_salt = secrets.token_hex(16)
-        self.password_hash = generate_password_hash(f"{password}{self.password_salt}")
+    Date_Of_Birth = db.Column(db.Date, nullable=False)
 
-    def verify_password(self, password):
-        # Check if the provided password matches the stored hash
-        return check_password_hash(self.password_hash, f"{password}{self.password_salt}")
+    contact_No = db.Column(db.String(20), nullable=True)
+    pt_Address = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
-        return f'<Patient {self.name}>'
+        return f"<Patient {self.patient_Id} - {self.FName} {self.LName}>"
 
     def to_dict(self):
-        # Format date of birth for JSON output
-        def format_date(d):
-            return d.strftime('%Y-%m-%d') if d else None
-
         return {
-            'id': self.id,
-            'name': self.name,
-            'email': self.email,
-            'phone': self.phone,
-            'gender': self.gender,
-            'date_of_birth': format_date(self.date_of_birth),
-            'address': self.address,
-            'doctor': {
-                'id': self.doctor.id,
-                'name': self.doctor.name
-            } if self.doctor else None
+            "patient_Id": self.patient_Id,
+            "FName": self.FName,
+            "LName": self.LName,
+            "Gender": self.Gender,
+            "Date_Of_Birth": self.Date_Of_Birth.isoformat() if self.Date_Of_Birth else None,
+            "contact_No": self.contact_No,
+            "pt_Address": self.pt_Address,
         }

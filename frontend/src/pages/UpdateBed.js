@@ -6,23 +6,14 @@ const UpdateBed = () => {
   const { bedId } = useParams(); // Only bedId is route param
 
   const [bedData, setBedData] = useState({
-    ward: "emergency",
+    ward: "",
     status: "unoccupied",
     hospital_id: null, // will be populated from backend
   });
 
   const [error, setError] = useState("");
 
-  const wards = [
-    "emergency",
-    "pediatrics",
-    "cardiology",
-    "oncology",
-    "neurology",
-    "orthopedics",
-    "radiology",
-    "maternity",
-  ];
+
 
   // Fetch existing bed data
   useEffect(() => {
@@ -37,7 +28,7 @@ const UpdateBed = () => {
           setError(data.error || "Failed to load bed data");
         } else {
           setBedData({
-            ward: data.ward || "emergency",
+            ward: data.ward || "",
             status: data.status || "unoccupied",
             hospital_id: data.hospital_id || null,
           });
@@ -111,21 +102,17 @@ const UpdateBed = () => {
 
       {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
 
-      {/* Ward Dropdown */}
+      {/* Ward TEXT INPUT */}
       <div style={{ marginBottom: "1.5rem" }}>
         <label>Ward</label>
-        <select
+        <input
+          type="text"
           name="ward"
+          placeholder="Enter ward name (e.g., emergency)"
           value={bedData.ward}
           onChange={handleChange}
           style={{ width: "100%", marginTop: "0.5rem", padding: "6px" }}
-        >
-          {wards.map((ward) => (
-            <option key={ward} value={ward}>
-              {ward.charAt(0).toUpperCase() + ward.slice(1)}
-            </option>
-          ))}
-        </select>
+        />
       </div>
 
       {/* Status Dropdown */}

@@ -1,14 +1,29 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from db_model import db, init_db
+from db_model import db, init_db,  insert_mock_data, preinsert_departments
 from flask_cors import CORS
 from routes import register_routes
+import pandas as pd
 import json
+from sqlalchemy import inspect   # <-- This is SQLAlchemy's inspector, works with Flask-SQLAlchemy
+
+def print_db_schema(app):
+    with app.app_context():
+        inspector = inspect(db.engine)
+
+        tables = inspector.get_table_names()
+
+        print("\n=== DATABASE TABLES ===")
+        for table in tables:
+            print(f"\n🟦 Table: {table}")
+            columns = inspector.get_columns(table)
+            for col in columns:
+                print(f"   - {col['name']} ({col['type']})")
+
+
 app = Flask(__name__)
 
 
-from flask import Flask
-from db_model import init_db, db, Patient, Doctor, Hospital, Event, BedOccupancy
 
 def create_app():
     app = Flask(__name__)
@@ -40,8 +55,6 @@ CORS(app,
      }})
 
 
-with app.app_context():
-    db.create_all()
 
 global_app = app
 global_db = db
@@ -55,23 +68,7 @@ def reset_db(app):
         print("✅ Database has been reset!")
 
 
-def test_db():
-    with app.app_context():
-    # Create a new patient instance
-        new_patient = Patient(
-            name='John Doe',
-            email='john.doe@example.com',
-            phone='1234567890',
-            gender='male',
-            address='123 Main Street',
-        )
-
-        # Set password (uses your setter method)
-        new_patient.password = 'secret123'
-
-        # Add to session and commit
-        db.session.add(new_patient)
-        db.session.commit()
+    
 
 
 
@@ -84,30 +81,25 @@ def reset_database_route():
 
 
 
-# get all hospitals
-@app.route('/api/get_hospitals', methods=['POST'])
-def get_hospitals():
-    from db_model.hospital import Hospital
-    with app.app_context():
-        hospitals = Hospital.query.all()
-        hospitals_list = [hospital.to_dict() for hospital in hospitals]
-        return jsonify(hospitals_list)
 
 
-
-
-    
-
-
-
-
+@ app.route('/api/insert_mock', methods=['POST'])
+def insert_mock_data_route():
+    # Implement the logic to insert mock data here
+    insert_mock_data()
+    from interfaces import PatientService
+    patients = PatientService.get_all_patients()
+    print(f"Number of patients after mock data insertion: {len(patients)}")
+    return jsonify({"message": "Mock data inserted!"})
 
 @app.route('/')
 def index():
-    
     return "Database initialized and app running!"
 
 if __name__ == '__main__':
+    print_db_schema(app)
+    with app.app_context():
+        preinsert_departments()
     app.run(debug=True)
 
 

@@ -8,7 +8,6 @@ const Home = () => {
   const handleSend = async () => {
     if (!userMessage.trim()) return;
 
-    // Add user message to chat history
     const updatedHistory = [...chatHistory, { role: "user", content: userMessage }];
     setChatHistory(updatedHistory);
 
@@ -25,9 +24,8 @@ const Home = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Add assistant reply to chat
         setChatHistory([...updatedHistory, { role: "assistant", content: data.reply }]);
-        setUserMessage(""); // clear input
+        setUserMessage("");
         setError("");
       } else {
         setError(data.error || "Error communicating with GPT.");
@@ -41,6 +39,23 @@ const Home = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  // New function for Insert Mock button
+  const handleInsertMock = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/insert_mock", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        alert("Mock data inserted successfully!");
+      } else {
+        alert("Failed to insert mock data.");
+      }
+    } catch (err) {
+      alert("Error connecting to server.");
     }
   };
 
@@ -59,9 +74,7 @@ const Home = () => {
           backgroundColor: "#f9f9f9",
         }}
       >
-        {chatHistory.length === 0 && (
-          <p className="text-muted">Start the conversation below...</p>
-        )}
+        {chatHistory.length === 0 && <p className="text-muted">Start the conversation below...</p>}
         {chatHistory.map((msg, idx) => (
           <div
             key={idx}
@@ -89,7 +102,7 @@ const Home = () => {
 
       {error && <p style={{ color: "red", marginBottom: "0.5rem" }}>{error}</p>}
 
-      <div style={{ display: "flex", gap: "0.5rem" }}>
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
         <textarea
           value={userMessage}
           onChange={(e) => setUserMessage(e.target.value)}
@@ -115,14 +128,31 @@ const Home = () => {
             cursor: "pointer",
             fontWeight: "bold",
           }}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = "black";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = "#0b3d91";
-          }}
+          onMouseOver={(e) => (e.target.style.backgroundColor = "black")}
+          onMouseOut={(e) => (e.target.style.backgroundColor = "#0b3d91")}
         >
           Send
+        </button>
+      </div>
+
+      {/* New Insert Mock button */}
+      <div style={{ textAlign: "center" }}>
+        <button
+          onClick={handleInsertMock}
+          style={{
+            backgroundColor: "#0b3d91",
+            color: "white",
+            border: "none",
+            padding: "0.5rem 1.5rem",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            marginTop: "1rem",
+          }}
+          onMouseOver={(e) => (e.target.style.backgroundColor = "black")}
+          onMouseOut={(e) => (e.target.style.backgroundColor = "#0b3d91")}
+        >
+          Insert Mock Data
         </button>
       </div>
     </div>
