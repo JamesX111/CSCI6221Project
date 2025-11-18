@@ -30,7 +30,7 @@ export default function LiveSimulation() {
 
       {/* Event Card */}
       <div className="card event-card">
-        <h3>🚨 Event Detected</h3>
+        <h3> Event Detected</h3>
         <p><strong>Type:</strong> {event_type}</p>
         <p><strong>Severity:</strong> {severity}</p>
         <p><strong>Location:</strong> {location}</p>
@@ -39,7 +39,7 @@ export default function LiveSimulation() {
 
       {/* Bed Allocation */}
       <div className="card beds-card">
-        <h3>🛏 Bed Assignments</h3>
+        <h3>Bed Assignments</h3>
 
         {allocations.length === 0 && <p>No patients this cycle.</p>}
 
@@ -57,7 +57,7 @@ export default function LiveSimulation() {
 
       {/* AI Summary */}
       <div className="card ai-card">
-        <h3>🤖 AI Summary</h3>
+        <h3>AI Summary</h3>
         <p>{summary}</p>
       </div>
     </div>

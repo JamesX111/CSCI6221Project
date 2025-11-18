@@ -33,7 +33,7 @@ export default function LiveSimulationDetail() {
   const accepted = !!eventData.accepted;
 
   // -----------------------------------------------------------
-  // ⭐ FIXED: Accept event & store staff names
+  // FIXED: Accept event & store staff names
   // -----------------------------------------------------------
   const handleAccept = async () => {
     setAccepting(true);
@@ -61,7 +61,7 @@ export default function LiveSimulationDetail() {
 
       const data = await res.json();
 
-      // ⭐ FIX: Store staff object including names
+      // FIX: Store staff object including names
       setEventData((prev) => ({
         ...prev,
         accepted: true,
@@ -88,7 +88,7 @@ export default function LiveSimulationDetail() {
 
   const shownAllocations = displayAllocations();
 
-  // ⭐ Use names if available
+  //  Use names if available
   const assignedStaff = eventData.assigned_staff || {};
 
   const nurseName = assignedStaff.nurse || "N/A";
@@ -99,7 +99,7 @@ export default function LiveSimulationDetail() {
       <h2>Real-Time Hospital Simulation</h2>
 
       <div className="card">
-        <h3>🚨 Event Detected</h3>
+        <h3>Event Detected</h3>
         <p><strong>Type:</strong> {event_type}</p>
         <p><strong>Severity:</strong> {severity}</p>
         <p><strong>Location:</strong> {location}</p>
@@ -122,11 +122,11 @@ export default function LiveSimulationDetail() {
       </div>
 
       {/* ----------------------------------------------------
-           ⭐ NEW: SHOW STAFF NAMES (no ID flashing)
+            NEW: SHOW STAFF NAMES (no ID flashing)
          ---------------------------------------------------- */}
       {accepted && assignedStaff && (
         <div className="card">
-          <h3>👩‍⚕️ Assigned Staff</h3>
+          <h3>Assigned Staff</h3>
 
           <p>
             <strong>Nurse:</strong> {nurseName ? nurseName : "N/A"}
@@ -158,7 +158,7 @@ export default function LiveSimulationDetail() {
 
 
       <div className="card">
-        <h3>🤖 AI Summary</h3>
+        <h3>AI Summary</h3>
         <p>{summary}</p>
       </div>
     </div>
