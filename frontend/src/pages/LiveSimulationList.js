@@ -4,6 +4,7 @@ import "./LiveSimulationList.css";
 
 export default function LiveSimulationList() {
   const [events, setEvents] = useState([]);
+  const [severityFilter, setSeverityFilter] = useState("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,12 +30,40 @@ export default function LiveSimulationList() {
     return `hsl(${hue}, 80%, 85%)`;
   };
 
+  // Apply severity filter
+  const filteredEvents =
+    severityFilter === "all"
+      ? events
+      : events.filter((evt) => {
+          const base = evt.raw_event || evt.event || evt;
+          return String(base.severity) === String(severityFilter);
+        });
+
   return (
     <div className="container">
       <h2>Active Live Events</h2>
 
-      {events.length === 0 ? (
-        <p>No active hospital events…</p>
+      {/* 🔽 Severity Filter Dropdown */}
+      <div className="severity-filter">
+        <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+          Filter by Severity:
+        </label>
+        <select
+          value={severityFilter}
+          onChange={(e) => setSeverityFilter(e.target.value)}
+          className="severity-dropdown"
+        >
+          <option value="all">All</option>
+          <option value="1">1 (Low)</option>
+          <option value="2">2</option>
+          <option value="3">3 (Medium)</option>
+          <option value="4">4</option>
+          <option value="5">5 (High)</option>
+        </select>
+      </div>
+
+      {filteredEvents.length === 0 ? (
+        <p>No events match this severity.</p>
       ) : (
         <table className="events-table">
           <thead>
@@ -45,7 +74,7 @@ export default function LiveSimulationList() {
             </tr>
           </thead>
           <tbody>
-            {events.map((evt) => {
+            {filteredEvents.map((evt) => {
               const base = evt.raw_event || evt.event || evt;
               return (
                 <tr

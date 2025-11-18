@@ -30,3 +30,13 @@
 .clickable-row:hover {
   filter: brightness(90%);
 }
+
+.severity-filter {
+  margin-bottom: 15px;
+}
+
+.severity-dropdown {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+}
