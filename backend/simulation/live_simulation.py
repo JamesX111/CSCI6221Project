@@ -90,7 +90,7 @@ def _simulation_loop():
             _print_dashboard(evt_dict, predicted, allocations, summary)
 
             # 4) Wait until next “accident”
-            gen.random_wait(6, 12)
+            gen.random_wait(0, 5)
 
 
 # ---------- Optional console view (for your terminal demo) ----------
