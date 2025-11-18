@@ -51,28 +51,103 @@ def create_app():
     app.register_blueprint(event_bp, url_prefix="/api")
     app.register_blueprint(live_bp, url_prefix="/api")
 
-    # -------------------------------------------------------
-    #  LEGACY FRONTEND ENDPOINTS (Patients / Events / etc.)
-    #  These match EXACTLY what the React app calls:
-    #  /api/get_patients, /api/get_events, /api/get_bedding, ...
-    # -------------------------------------------------------
 
-    @app.route('/api/get_hospitals', methods=['GET', 'POST'])
+    @app.route('/api/get_hospitals', methods=['GET'])
     def get_hospitals():
-        engine = create_engine(f"sqlite:///{DB_PATH}")
+        import pandas as pd
+        import sqlite3
+
+        conn = sqlite3.connect(DB_PATH)
+
         query = """
-            SELECT 
-                dept_Id   AS id,
-                dept_Name AS name,
-                '-'       AS address,
-                '-'       AS phone,
-                '-'       AS email,
-                '-'       AS departments
-            FROM department
+            SELECT
+                id,
+                name,
+                address,
+                phone,
+                email,
+
+                (has_emergency +
+                has_pediatrics +
+                has_cardiology +
+                has_oncology +
+                has_neurology +
+                has_orthopedics +
+                has_radiology +
+                has_maternity) AS departments
+
+            FROM hospital
             LIMIT 50
         """
-        df = pd.read_sql(query, engine)
+
+        df = pd.read_sql(query, conn)
+        conn.close()
+
+        return jsonify(df.to_dict(orient="records"))
+
+
+    @app.route('/api/get_bedding', methods=['GET'])
+    def get_bedding():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+
+        query = """
+            SELECT
+                b.bed_No AS bed_id,
+                b.ward_No AS ward,
+
+                CASE 
+                    WHEN (
+                        SELECT discharge_Date
+                        FROM bedrecords br
+                        WHERE br.bed_No = b.bed_No
+                        ORDER BY br.admission_Date DESC
+                        LIMIT 1
+                    ) IS NULL
+                    THEN 'Occupied'
+                    ELSE 'Free'
+                END AS status
+
+            FROM bed b
+            ORDER BY b.bed_No
+            LIMIT 300;
+        """
+
+        df = pd.read_sql(query, conn)
+        conn.close()
         return jsonify(df.to_dict(orient='records'))
+
+
+
+
+    @app.route('/api/get_departments', methods=['GET'])
+    def get_departments():
+        query = """
+            SELECT 
+                dept_Id AS id,
+                dept_Name AS name
+            FROM department
+            ORDER BY dept_Id
+        """
+        df = pd.read_sql(query, sqlite3.connect(DB_PATH))
+        return jsonify(df.to_dict(orient='records'))
+
+    
+    @app.route('/api/get_nurses', methods=['GET'])
+    def get_nurses():
+        query = """
+            SELECT
+                nurse_Id AS id,
+                FName || ' ' || LName AS name,
+                COALESCE(conatct_No, '-') AS phone,
+                Gender AS gender
+            FROM nurse
+            ORDER BY nurse_Id
+        """
+        df = pd.read_sql(query, sqlite3.connect(DB_PATH))
+        return jsonify(df.to_dict(orient='records'))
+
+
 
     @app.route("/api/get_doctors", methods=["GET", "POST"])
     def get_doctors():
@@ -87,21 +162,36 @@ def create_app():
         """
         df = read_table(query)
         return jsonify(df.to_dict(orient="records"))
-
-    @app.route('/api/get_bedding', methods=['GET', 'POST'])
-    def get_bedding():
-        engine = create_engine(f"sqlite:///{DB_PATH}")
+    
+    @app.route('/api/get_helpers', methods=['GET'])
+    def get_helpers():
         query = """
-            SELECT 
-                bed_No  AS bed_id,
-                ward_No AS ward,
-                '-'     AS status,
-                '-'     AS last_updated
-            FROM bed
-            LIMIT 100
+            SELECT
+                helper_Id AS id,
+                FName || ' ' || LName AS name,
+                COALESCE(contact_No, '-') AS phone,
+                Gender AS gender
+            FROM helpers
+            ORDER BY helper_Id
         """
-        df = pd.read_sql(query, engine)
+        df = pd.read_sql(query, sqlite3.connect(DB_PATH))
         return jsonify(df.to_dict(orient='records'))
+    
+    @app.route('/api/get_doctors_list', methods=['GET'])
+    def get_doctors_list():
+        query = """
+            SELECT
+                doct_Id AS id,
+                FName || ' ' || LName AS name,
+                COALESCE(contact_No, '-') AS phone,
+                Gender AS gender,
+                surgeon_Type AS specialty
+            FROM doctor
+            ORDER BY doct_Id
+        """
+        df = pd.read_sql(query, sqlite3.connect(DB_PATH))
+        return jsonify(df.to_dict(orient='records'))
+
 
     @app.route('/api/get_events', methods=['GET', 'POST'])
     def get_events():
@@ -138,7 +228,7 @@ def create_app():
         conn.row_factory = sqlite3.Row
 
         # ---------------------------------------------------------
-        # 1️⃣ Subquery: Get only the LATEST admission per patient
+        # 1️Subquery: Get only the LATEST admission per patient
         # ---------------------------------------------------------
         query = f"""
             SELECT 
@@ -201,11 +291,6 @@ def create_app():
         conn.close()
 
         return jsonify(df.to_dict(orient="records"))
-
-
-
-
-
 
     # ----------------- Forecasting endpoints -----------------
 
