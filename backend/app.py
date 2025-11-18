@@ -125,22 +125,87 @@ def create_app():
             print("[ERROR] /api/get_events failed:", e)
             return jsonify([])
 
-    @app.route('/api/get_patients', methods=['GET', 'POST'])
+    @app.route('/api/get_patients', methods=['GET'])
     def get_patients():
-        engine = create_engine(f"sqlite:///{DB_PATH}")
-        query = """
+        import pandas as pd
+        import sqlite3
+
+        status = request.args.get("status", "admitted").lower()
+        print(">>>> RUNNING PATIENT QUERY WITH STATUS =", status)
+        DB_PATH = app.config["DB_PATH"]
+
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+
+        # ---------------------------------------------------------
+        # 1️⃣ Subquery: Get only the LATEST admission per patient
+        # ---------------------------------------------------------
+        query = f"""
             SELECT 
-                patient_Id            AS id,
-                FName || ' ' || LName AS name,
-                email,
-                contact_No            AS phone,
-                Gender                AS gender,
-                pt_Address            AS address
-            FROM patients
-            LIMIT 100
+                p.patient_Id AS id,
+                p.FName || ' ' || p.LName AS name,
+
+                CASE 
+                    WHEN p.email IS NULL 
+                        OR p.email = '' 
+                        OR LOWER(p.email) = 'unknown@example.com'
+                    THEN LOWER(p.LName || '.' || p.FName || '@gmail.com')
+                    ELSE p.email
+                END AS email,
+
+                p.contact_No AS phone,
+                p.Gender AS gender,
+                p.pt_Address AS address,
+
+                CAST((julianday('now') - julianday(p.Date_Of_Birth)) / 365 AS INT) AS age,
+
+                -- Bed info
+                br.bed_No AS bed_number,
+                br.admission_Date AS admitted_on,
+                br.discharge_Date AS discharged_on,
+
+                -- Correct doctor join chain: bedrecords → staffshift → doctor
+                d.FName || ' ' || d.LName AS doctor
+
+            FROM patients p
+
+            LEFT JOIN bedrecords br 
+                ON p.patient_Id = br.patient_Id
+
+            LEFT JOIN staffshift s
+                ON br.nurse_Id = s.nurse_Id   -- nurse handles the admission
+
+            LEFT JOIN doctor d
+                ON s.doct_Id = d.doct_Id      -- nurse's doctor supervisor
+
+            WHERE 1=1
         """
-        df = pd.read_sql(query, engine)
-        return jsonify(df.to_dict(orient='records'))
+
+
+        # ---------------------------------------------------------
+        # 2 Apply filter AFTER latest admission is selected
+        # ---------------------------------------------------------
+        if status == "admitted":
+            query += " AND br.patient_Id IS NOT NULL AND br.discharge_Date IS NULL"
+        elif status == "completed":
+            query += " AND br.patient_Id IS NOT NULL AND br.discharge_Date IS NOT NULL"
+
+        query += """
+            GROUP BY p.patient_Id
+            ORDER BY p.patient_Id DESC
+            LIMIT 200
+        """
+
+
+        df = pd.read_sql(query, conn)
+        conn.close()
+
+        return jsonify(df.to_dict(orient="records"))
+
+
+
+
+
 
     # ----------------- Forecasting endpoints -----------------
 
