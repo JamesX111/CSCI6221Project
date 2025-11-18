@@ -58,7 +58,8 @@ def broadcast_update(event, predicted, allocations, summary):
 def _simulation_loop():
     """
     Runs the real-time simulation in a background thread.
-    Uses app.app_context() to safely access the DB and models.
+    Uses app.app_context() to safely access configuration if needed.
+    Simulation is now READ-ONLY with respect to the database.
     """
     global app, socketio
 
@@ -79,15 +80,13 @@ def _simulation_loop():
             evt_dict = event_to_dict(evt)
             evt_dict["event_id"] = str(uuid.uuid4())
 
-            # 2) Forecast patients and allocate resources
+            # 2) Forecast patients and SUGGEST resources (no writes)
             predicted = optimizer.forecast_patients(evt_dict)
             allocations = optimizer.allocate_resources(predicted)
             summary = optimizer.ai_summary(evt_dict, predicted, allocations)
 
             # 3) Broadcast + (optionally) print to console
             broadcast_update(evt_dict, predicted, allocations, summary)
-
-            # Console dashboard is optional – keep it for debugging/demo
             _print_dashboard(evt_dict, predicted, allocations, summary)
 
             # 4) Wait until next “accident”
@@ -113,8 +112,8 @@ def _print_dashboard(event, predicted, allocations, ai_text):
     admitted = sum(1 for _, b in allocations if b is not None)
     waiting = sum(1 for _, b in allocations if b is None)
 
-    print(f"Patients Assigned Beds: {admitted}")
-    print(f"Patients Waiting: {waiting}\n")
+    print(f"Patients Assigned Beds (simulated): {admitted}")
+    print(f"Patients Waiting (simulated): {waiting}\n")
 
     print("AI Summary:")
     print("-----------------------------------------------")

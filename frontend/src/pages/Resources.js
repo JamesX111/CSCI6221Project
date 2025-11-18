@@ -10,7 +10,7 @@ const Resources = () => {
   const [doctors, setDoctors] = useState([]);
   const [helpers, setHelpers] = useState([]);
 
-  useEffect(() => {
+  const fetchAll = () => {
     // Beds
     fetch('http://127.0.0.1:5000/api/get_bedding')
       .then(res => res.json())
@@ -40,7 +40,12 @@ const Resources = () => {
       .then(res => res.json())
       .then(data => setHelpers(data))
       .catch(console.error);
+  };
 
+  useEffect(() => {
+    fetchAll();
+    const interval = setInterval(fetchAll, 5000); // refresh every 5s
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -85,7 +90,6 @@ const Resources = () => {
         </Button>
       </ButtonGroup>
 
-
       {/* ---------------- BEDS ---------------- */}
       {view === "beds" && (
         <>
@@ -112,7 +116,6 @@ const Resources = () => {
           </Table>
         </>
       )}
-
 
       {/* ---------------- DEPARTMENTS ---------------- */}
       {view === "departments" && (

@@ -10,6 +10,10 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from sqlalchemy import create_engine
 
+# rotation indices (global in this module)
+NURSE_INDEX = 0
+HELPER_INDEX = 0
+
 # Global SocketIO object (app will be attached in create_app)
 socketio = SocketIO()   # <-- NO app here
 
@@ -35,6 +39,22 @@ def create_app():
     from backend.db_model import db
     db.init_app(app)
 
+    # Ensure accepted_events table exists (schema WITHOUT 'accepted' column)
+    with sqlite3.connect(DB_PATH, timeout=5.0) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS accepted_events (
+                event_id TEXT PRIMARY KEY,
+                event_type TEXT,
+                severity INTEGER,
+                location TEXT,
+                patients_expected INTEGER,
+                patients_assigned INTEGER,
+                assigned_beds TEXT,
+                assigned_staff TEXT,
+                accepted_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
     # --- Small helper for simple SELECTs ---
     def read_table(query: str) -> pd.DataFrame:
         try:
@@ -51,14 +71,158 @@ def create_app():
     app.register_blueprint(event_bp, url_prefix="/api")
     app.register_blueprint(live_bp, url_prefix="/api")
 
+    # -----------------------------------------------------------
+    # Accept an event: this is the ONLY place we write for live events
+    # -----------------------------------------------------------
+    @app.route('/api/accept_event', methods=['POST'])
+    def accept_event():
+        """
+        Officially accept a simulated event, assign:
+        - beds
+        - one nurse
+        - one helper
+        Save results permanently and update ACTIVE_EVENTS.
+        """
+        from backend.simulation.live_simulation import ACTIVE_EVENTS
 
+        data = request.json
+        event_id = data["event_id"]
+        num_patients = int(data["patients"])
+        severity = int(data["severity"])
+        event_type = data["event_type"]
+        location = data["location"]
+
+        conn = sqlite3.connect(DB_PATH, timeout=10)
+        cursor = conn.cursor()
+
+        # -----------------------
+        # 1. Find free beds
+        # -----------------------
+        cursor.execute("""
+            SELECT bed_No 
+            FROM bed 
+            WHERE bed_No NOT IN (
+                SELECT bed_No FROM bedrecords WHERE discharge_Date IS NULL
+            )
+            LIMIT ?
+        """, (num_patients,))
+        free_beds = [row[0] for row in cursor.fetchall()]
+
+        if len(free_beds) < num_patients:
+            return jsonify({"error": "Not enough beds"}), 400
+
+        # -----------------------
+        # 2. Pick nurse + helper (ROTATING STAFF)
+        # -----------------------
+        global NURSE_INDEX, HELPER_INDEX
+
+        # Fetch all nurses
+        cursor.execute("SELECT nurse_Id, FName || ' ' || LName FROM nurse ORDER BY nurse_Id")
+        nurses = cursor.fetchall()
+
+        cursor.execute("SELECT helper_Id, FName || ' ' || LName FROM helpers ORDER BY helper_Id")
+        helpers = cursor.fetchall()
+
+        # Assign nurse
+        if nurses:
+            nurse_row = nurses[NURSE_INDEX % len(nurses)]
+            nurse_id, nurse_name = nurse_row
+            NURSE_INDEX += 1
+        else:
+            nurse_id, nurse_name = None, "N/A"
+
+        # Assign helper
+        if helpers:
+            helper_row = helpers[HELPER_INDEX % len(helpers)]
+            helper_id, helper_name = helper_row
+            HELPER_INDEX += 1
+        else:
+            helper_id, helper_name = None, "N/A"
+
+
+        # -----------------------
+        # 3. Create patients + insert admissions in ONE transaction
+        # -----------------------
+        assigned_patients = []
+        assigned_beds = []
+
+        for bed_no in free_beds:
+            cursor.execute("""
+                INSERT INTO patients(FName, LName, Gender, contact_No, pt_Address, email, Date_Of_Birth)
+                VALUES ('Unknown', 'Patient', 'Unknown', '', '', '', '1990-01-01')
+            """)
+            pid = cursor.lastrowid
+
+            cursor.execute("""
+                INSERT INTO bedrecords(bed_No, patient_Id, nurse_Id, helper_Id, admission_Date, discharge_Date)
+                VALUES (?, ?, ?, ?, datetime('now'), NULL)
+            """, (bed_no, pid, nurse_id, helper_id))
+
+            assigned_patients.append(pid)
+            assigned_beds.append(bed_no)
+
+        # -----------------------
+        # 4. Save accepted event
+        # -----------------------
+        cursor.execute("""
+            INSERT OR REPLACE INTO accepted_events(
+                event_id, event_type, severity, location,
+                patients_expected, patients_assigned,
+                assigned_beds, assigned_staff,
+                accepted, accepted_timestamp
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+        """, (
+            event_id, event_type, severity, location,
+            num_patients, len(assigned_patients),
+            ",".join(map(str, assigned_beds)),
+            f"Nurse: {nurse_name} | Helper: {helper_name}"
+        ))
+
+        conn.commit()
+        conn.close()
+
+        # -----------------------
+        # 5. Update ACTIVE_EVENTS (frontend state won't RESET)
+        # -----------------------
+        if event_id in ACTIVE_EVENTS:
+            ACTIVE_EVENTS[event_id]["accepted"] = True
+            ACTIVE_EVENTS[event_id]["assigned_staff"] = {
+                "nurse": nurse_name,
+                "helper": helper_name
+            }
+            ACTIVE_EVENTS[event_id]["accepted_beds"] = assigned_beds
+
+        # -----------------------
+        # 6. Emit update
+        # -----------------------
+        socketio.emit("bed_update_event", {
+            "event_id": event_id,
+            "accepted": True,
+            "assigned_beds": assigned_beds,
+            "patients_assigned": len(assigned_patients),
+            "nurse": nurse_name,
+            "helper": helper_name
+        })
+
+        return jsonify({
+            "success": True,
+            "accepted": True,
+            "assigned_beds": assigned_beds,
+            "patients": assigned_patients,
+            "nurse": nurse_name,
+            "helper": helper_name
+        })
+
+
+
+
+    # -----------------------------------------------------------
+    # HOSPITAL / RESOURCES ENDPOINTS
+    # -----------------------------------------------------------
     @app.route('/api/get_hospitals', methods=['GET'])
     def get_hospitals():
-        import pandas as pd
-        import sqlite3
-
         conn = sqlite3.connect(DB_PATH)
-
         query = """
             SELECT
                 id,
@@ -79,12 +243,9 @@ def create_app():
             FROM hospital
             LIMIT 50
         """
-
         df = pd.read_sql(query, conn)
         conn.close()
-
         return jsonify(df.to_dict(orient="records"))
-
 
     @app.route('/api/get_bedding', methods=['GET'])
     def get_bedding():
@@ -95,7 +256,6 @@ def create_app():
             SELECT
                 b.bed_No AS bed_id,
                 b.ward_No AS ward,
-
                 CASE 
                     WHEN (
                         SELECT discharge_Date
@@ -107,7 +267,6 @@ def create_app():
                     THEN 'Occupied'
                     ELSE 'Free'
                 END AS status
-
             FROM bed b
             ORDER BY b.bed_No
             LIMIT 300;
@@ -116,9 +275,6 @@ def create_app():
         df = pd.read_sql(query, conn)
         conn.close()
         return jsonify(df.to_dict(orient='records'))
-
-
-
 
     @app.route('/api/get_departments', methods=['GET'])
     def get_departments():
@@ -132,7 +288,6 @@ def create_app():
         df = pd.read_sql(query, sqlite3.connect(DB_PATH))
         return jsonify(df.to_dict(orient='records'))
 
-    
     @app.route('/api/get_nurses', methods=['GET'])
     def get_nurses():
         query = """
@@ -147,8 +302,6 @@ def create_app():
         df = pd.read_sql(query, sqlite3.connect(DB_PATH))
         return jsonify(df.to_dict(orient='records'))
 
-
-
     @app.route("/api/get_doctors", methods=["GET", "POST"])
     def get_doctors():
         query = """
@@ -162,7 +315,7 @@ def create_app():
         """
         df = read_table(query)
         return jsonify(df.to_dict(orient="records"))
-    
+
     @app.route('/api/get_helpers', methods=['GET'])
     def get_helpers():
         query = """
@@ -176,7 +329,7 @@ def create_app():
         """
         df = pd.read_sql(query, sqlite3.connect(DB_PATH))
         return jsonify(df.to_dict(orient='records'))
-    
+
     @app.route('/api/get_doctors_list', methods=['GET'])
     def get_doctors_list():
         query = """
@@ -191,7 +344,6 @@ def create_app():
         """
         df = pd.read_sql(query, sqlite3.connect(DB_PATH))
         return jsonify(df.to_dict(orient='records'))
-
 
     @app.route('/api/get_events', methods=['GET', 'POST'])
     def get_events():
@@ -217,24 +369,17 @@ def create_app():
 
     @app.route('/api/get_patients', methods=['GET'])
     def get_patients():
-        import pandas as pd
-        import sqlite3
-
         status = request.args.get("status", "admitted").lower()
         print(">>>> RUNNING PATIENT QUERY WITH STATUS =", status)
-        DB_PATH = app.config["DB_PATH"]
+        DB_PATH_LOCAL = app.config["DB_PATH"]
 
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DB_PATH_LOCAL)
         conn.row_factory = sqlite3.Row
 
-        # ---------------------------------------------------------
-        # 1️Subquery: Get only the LATEST admission per patient
-        # ---------------------------------------------------------
         query = f"""
             SELECT 
                 p.patient_Id AS id,
                 p.FName || ' ' || p.LName AS name,
-
                 CASE 
                     WHEN p.email IS NULL 
                         OR p.email = '' 
@@ -242,39 +387,24 @@ def create_app():
                     THEN LOWER(p.LName || '.' || p.FName || '@gmail.com')
                     ELSE p.email
                 END AS email,
-
                 p.contact_No AS phone,
                 p.Gender AS gender,
                 p.pt_Address AS address,
-
                 CAST((julianday('now') - julianday(p.Date_Of_Birth)) / 365 AS INT) AS age,
-
-                -- Bed info
                 br.bed_No AS bed_number,
                 br.admission_Date AS admitted_on,
                 br.discharge_Date AS discharged_on,
-
-                -- Correct doctor join chain: bedrecords → staffshift → doctor
                 d.FName || ' ' || d.LName AS doctor
-
             FROM patients p
-
             LEFT JOIN bedrecords br 
                 ON p.patient_Id = br.patient_Id
-
             LEFT JOIN staffshift s
-                ON br.nurse_Id = s.nurse_Id   -- nurse handles the admission
-
+                ON br.nurse_Id = s.nurse_Id
             LEFT JOIN doctor d
-                ON s.doct_Id = d.doct_Id      -- nurse's doctor supervisor
-
+                ON s.doct_Id = d.doct_Id
             WHERE 1=1
         """
 
-
-        # ---------------------------------------------------------
-        # 2 Apply filter AFTER latest admission is selected
-        # ---------------------------------------------------------
         if status == "admitted":
             query += " AND br.patient_Id IS NOT NULL AND br.discharge_Date IS NULL"
         elif status == "completed":
@@ -286,10 +416,8 @@ def create_app():
             LIMIT 200
         """
 
-
         df = pd.read_sql(query, conn)
         conn.close()
-
         return jsonify(df.to_dict(orient="records"))
 
     # ----------------- Forecasting endpoints -----------------
@@ -326,8 +454,8 @@ def create_app():
 
     @socketio.on("bed_update")
     def handle_bed_update(data):
-        # this is still here in case you manually emit bed_update from somewhere
-        socketio.emit("bed_update_event", data, broadcast=True)
+        # This is still here in case you manually emit bed_update from somewhere
+        socketio.emit("bed_update_event", data)
 
     @app.route("/")
     def index():

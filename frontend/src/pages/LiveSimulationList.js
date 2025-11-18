@@ -5,6 +5,7 @@ import "./LiveSimulationList.css";
 export default function LiveSimulationList() {
   const [events, setEvents] = useState([]);
   const [severityFilter, setSeverityFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all"); // all | accepted | pending
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,40 +31,72 @@ export default function LiveSimulationList() {
     return `hsl(${hue}, 80%, 85%)`;
   };
 
-  // Apply severity filter
-  const filteredEvents =
-    severityFilter === "all"
-      ? events
-      : events.filter((evt) => {
-          const base = evt.raw_event || evt.event || evt;
-          return String(base.severity) === String(severityFilter);
-        });
+  const filteredEvents = events.filter((evt) => {
+    const base = evt.raw_event || evt.event || evt;
+    const sevMatches =
+      severityFilter === "all" ||
+      String(base.severity) === String(severityFilter);
+
+    const accepted = !!evt.accepted;
+    const statusMatches =
+      statusFilter === "all" ||
+      (statusFilter === "accepted" && accepted) ||
+      (statusFilter === "pending" && !accepted);
+
+    return sevMatches && statusMatches;
+  });
 
   return (
     <div className="container">
       <h2>Active Live Events</h2>
 
-      {/* 🔽 Severity Filter Dropdown */}
-      <div className="severity-filter">
-        <label style={{ marginRight: "10px", fontWeight: "bold" }}>
-          Filter by Severity:
-        </label>
-        <select
-          value={severityFilter}
-          onChange={(e) => setSeverityFilter(e.target.value)}
-          className="severity-dropdown"
-        >
-          <option value="all">All</option>
-          <option value="1">1 (Low)</option>
-          <option value="2">2</option>
-          <option value="3">3 (Medium)</option>
-          <option value="4">4</option>
-          <option value="5">5 (High)</option>
-        </select>
+      {/* Filters Row */}
+      <div
+        className="filters-row"
+        style={{
+          display: "flex",
+          gap: "20px",
+          alignItems: "center",
+          marginBottom: "15px",
+        }}
+      >
+        {/* 🔽 Severity Filter */}
+        <div className="severity-filter">
+          <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+            Filter by Severity:
+          </label>
+          <select
+            value={severityFilter}
+            onChange={(e) => setSeverityFilter(e.target.value)}
+            className="severity-dropdown"
+          >
+            <option value="all">All</option>
+            <option value="1">1 (Low)</option>
+            <option value="2">2</option>
+            <option value="3">3 (Medium)</option>
+            <option value="4">4</option>
+            <option value="5">5 (High)</option>
+          </select>
+        </div>
+
+        {/* 🔽 Acceptance Filter */}
+        <div className="status-filter">
+          <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+            Status:
+          </label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="accepted">Accepted</option>
+            <option value="pending">Not Accepted</option>
+          </select>
+        </div>
       </div>
 
       {filteredEvents.length === 0 ? (
-        <p>No events match this severity.</p>
+        <p>No events match this filter.</p>
       ) : (
         <table className="events-table">
           <thead>
@@ -71,11 +104,13 @@ export default function LiveSimulationList() {
               <th>Event Type</th>
               <th>Severity</th>
               <th>Location</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {filteredEvents.map((evt) => {
               const base = evt.raw_event || evt.event || evt;
+              const accepted = !!evt.accepted;
               return (
                 <tr
                   key={evt.event_id}
@@ -86,6 +121,7 @@ export default function LiveSimulationList() {
                   <td>{base.event_type}</td>
                   <td>{base.severity}</td>
                   <td>{base.location}</td>
+                  <td>{accepted ? "Accepted" : "Pending"}</td>
                 </tr>
               );
             })}

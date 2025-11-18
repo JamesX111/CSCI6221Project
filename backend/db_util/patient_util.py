@@ -1,5 +1,10 @@
 from datetime import datetime
 import secrets
+import time
+import os
+import sqlite3
+from sqlalchemy.exc import OperationalError
+
 
 # ---------------------------------------------------
 # Create a new patient
@@ -8,6 +13,7 @@ def create_patient(patient_data):
     from backend.db_model import db
     from backend.db_model.patient import Patient
     """Create a new Patient record in the database."""
+
     required_fields = ['name']
     for field in required_fields:
         if field not in patient_data or not patient_data[field]:
@@ -18,16 +24,13 @@ def create_patient(patient_data):
         unique_number = secrets.randbelow(10**10)
         patient_data["phone"] = f"SIM-{unique_number}"
 
-    # ---- AUTO-GENERATE UNIQUE EMAIL IF SIM DEFAULT OR DUPLICATE ----
+    # ---- AUTO-GENERATE UNIQUE EMAIL IF SIM DEFAULT OR EMPTY ----
     base_email = patient_data.get("email", "")
     if base_email.startswith("simpatient") or (base_email == ""):
         unique_part = secrets.randbelow(10**10)
         patient_data["email"] = f"sim{unique_part}@simulation.com"
-    
 
-
-
-    # Create new Patient instance
+    # Create new Patient instance (ORM)
     new_patient = Patient(
         name=patient_data['name'],
         email=patient_data['email'],
@@ -42,10 +45,21 @@ def create_patient(patient_data):
     new_patient.password = patient_data.get("password", "default123")
 
     db.session.add(new_patient)
-    db.session.commit()
+
+    # --- Small retry guard in case of transient sqlite "database is locked" ---
+    for attempt in range(3):
+        try:
+            db.session.commit()
+            break
+        except OperationalError as e:
+            if "database is locked" in str(e).lower() and attempt < 2:
+                db.session.rollback()
+                time.sleep(0.2)
+            else:
+                db.session.rollback()
+                raise
 
     return new_patient.to_dict() if hasattr(new_patient, 'to_dict') else new_patient
-
 
 
 # ---------------------------------------------------
@@ -73,7 +87,6 @@ def update_patient(patient_id, update_data):
 # Get a patient by ID **or** email
 # ---------------------------------------------------
 def get_patient(identifier):
-    from backend.db_model import db
     from backend.db_model.patient import Patient
     """
     Retrieve a patient by either ID (int) or email (str).
@@ -82,10 +95,8 @@ def get_patient(identifier):
         get_patient("john@example.com")
     """
     if isinstance(identifier, int) or (isinstance(identifier, str) and identifier.isdigit()):
-        # Treat as ID
         patient = Patient.query.get(int(identifier))
     elif isinstance(identifier, str):
-        # Treat as email
         patient = Patient.query.filter_by(email=identifier).first()
     else:
         raise ValueError("Identifier must be an integer ID or a string email")
@@ -97,11 +108,8 @@ def get_patient(identifier):
 
 
 # ---------------------------------------------------
-# Get all patients
+# Get all patients (read-only helper)
 # ---------------------------------------------------
-import sqlite3
-import os
-
 def get_all_patients():
     """Retrieve all patients directly from SQLite (readable DB)."""
     db_path = os.path.join(os.path.dirname(__file__), "../../data/hospital_raw.db")
@@ -130,8 +138,6 @@ def get_all_patients():
         rows = cursor.fetchall()
         conn.close()
         return [dict(row) for row in rows]
-
     except Exception as e:
         print(f"[ERROR] Database query failed: {e}")
         return []
-
