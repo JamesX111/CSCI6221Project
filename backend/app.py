@@ -350,14 +350,26 @@ def create_app():
         engine = create_engine(f"sqlite:///{DB_PATH}")
         query = """
             SELECT 
-                appoIntment_Id      AS id,
-                patient_Id          AS patient,
-                doct_Id             AS doctor,
-                reason              AS description,
-                appointment_Date    AS scheduled,
-                appointment_status  AS status,
-                mode_of_appointment AS type
-            FROM appointment
+                a.appoIntment_Id AS id,
+
+                p.FName || ' ' || p.LName AS patient_name,
+                d.FName || ' ' || d.LName AS doctor_name,
+
+                a.reason AS description,
+                a.appointment_Date AS scheduled,
+
+                -- FIX: Convert Booked → Scheduled
+                CASE 
+                    WHEN a.appointment_status = 'Booked' THEN 'Scheduled'
+                    ELSE a.appointment_status
+                END AS status
+
+            FROM appointment a
+            LEFT JOIN patients p 
+                ON a.patient_Id = p.patient_Id
+            LEFT JOIN doctor d
+                ON a.doct_Id = d.doct_Id
+            ORDER BY a.appointment_Date DESC
             LIMIT 100
         """
         try:
@@ -366,6 +378,8 @@ def create_app():
         except Exception as e:
             print("[ERROR] /api/get_events failed:", e)
             return jsonify([])
+
+
 
     @app.route('/api/get_patients', methods=['GET'])
     def get_patients():

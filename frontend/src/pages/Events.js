@@ -15,9 +15,10 @@ const Events = () => {
   }, []);
 
   // Filter events based on selected status
-  const filteredEvents = statusFilter === 'all'
-    ? events
-    : events.filter(e => e.status === statusFilter);
+  const filteredEvents =
+    statusFilter === 'all'
+      ? events
+      : events.filter(e => e.status === statusFilter);
 
   return (
     <div className="events-page">
@@ -45,31 +46,28 @@ const Events = () => {
       </Form.Group>
 
       <Table striped bordered hover className="events-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Description</th>
-            <th>Scheduled</th>
-            <th>Status</th>
-            <th>Doctor</th>
-            <th>Patient</th>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Doctor</th>
+          <th>Patient</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {filteredEvents.map(e => (
+          <tr key={e.id}>
+            <td>{e.id}</td>
+            <td>{e.description}</td>
+            <td>{e.status}</td>
+            <td>{e.doctor_name}</td>
+            <td>{e.patient_name}</td>
           </tr>
-        </thead>
-        <tbody>
-          {filteredEvents.map(e => (
-            <tr key={e.id}>
-              <td>{e.id}</td>
-              <td>{e.type}</td>
-              <td>{e.description}</td>
-              <td>{e.scheduled}</td>
-              <td>{e.status}</td>
-              <td>{e.doctor ? e.doctor.name : '—'}</td>
-              <td>{e.patient ? e.patient.name : '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+        ))}
+      </tbody>
+    </Table>
     </div>
   );
 };
